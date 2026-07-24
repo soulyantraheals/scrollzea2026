@@ -1,0 +1,24 @@
+@import "tailwindcss";
+
+@theme {
+  --color-primary: #4F46E5;
+  --color-primary-dark: #4338CA;
+  --color-primary-light: #6366F1;
+  --color-primary-50: #EEF2FF;
+  --color-secondary: #111827;
+  --color-accent: #10B981;
+  --color-accent-amber: #F59E0B;
+  --color-accent-red: #EF4444;
+}
+
+@layer base {
+  body {
+    @apply antialiased text-gray-900 bg-white;
+  }
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+}
