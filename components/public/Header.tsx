@@ -50,13 +50,14 @@ export function Header() {
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16 lg:h-20">
-          {/* Logo */}
+          {/* Logo + Brand */}
           <Link href="/" className="flex items-center gap-3 group">
             <img
               src="/logo.jpg"
               alt="Scrollzea"
               className="h-8 lg:h-9 w-auto object-contain transition-transform duration-300 group-hover:scale-105"
             />
+            <span className="text-lg font-bold text-[var(--text-primary)] hidden sm:inline">Scrollzea</span>
           </Link>
 
           {/* Desktop Nav */}
@@ -70,10 +71,17 @@ export function Header() {
                 {link.label}
               </Link>
             ))}
+            {/* Contact Us */}
+            <Link
+              href="/contact"
+              className="btn-gold ml-4 inline-flex items-center gap-2 px-5 py-2 rounded-lg text-sm font-semibold"
+            >
+              Contact Us
+            </Link>
             {/* Theme Toggle */}
             <button
               onClick={toggleTheme}
-              className="ml-3 p-2.5 rounded-lg border border-[var(--border-gold)] text-[var(--accent-gold)] hover:bg-[var(--accent-glow)] transition-all duration-200"
+              className="ml-2 p-2.5 rounded-lg border border-[var(--border-gold)] text-[var(--accent-gold)] hover:bg-[var(--accent-glow)] transition-all duration-200"
               aria-label="Toggle theme"
             >
               {darkMode ? (
@@ -90,6 +98,12 @@ export function Header() {
 
           {/* Mobile Menu Button */}
           <div className="flex items-center gap-2 md:hidden">
+            <Link
+              href="/contact"
+              className="btn-gold px-4 py-1.5 rounded-lg text-sm font-semibold"
+            >
+              Contact
+            </Link>
             <button
               onClick={toggleTheme}
               className="p-2 rounded-lg border border-[var(--border-gold)] text-[var(--accent-gold)]"
