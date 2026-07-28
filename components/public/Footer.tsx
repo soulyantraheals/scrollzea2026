@@ -7,8 +7,8 @@ export function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-10">
           {/* Brand */}
           <div className="md:col-span-2">
-            <Link href="/" className="text-xl font-bold text-indigo-600">
-              Scrollzea
+            <Link href="/" className="flex items-center gap-2">
+              <img src="/logo.png" alt="Scrollzea" className="h-8 w-auto" />
             </Link>
             <p className="mt-3 text-sm text-gray-500 max-w-sm leading-relaxed">
               Digital Products & Creative Digital Solutions. Discover ready-to-use digital products,
