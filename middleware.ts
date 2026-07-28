@@ -7,15 +7,13 @@ export default function middleware(req: NextRequest) {
   const isAdminLogin = pathname === "/admin/login";
   const isSetupRoute = pathname === "/api/setup";
 
-  // Skip auth check for API routes and setup
+  // Pass through API routes and setup
   if (isSetupRoute || pathname.startsWith("/api/")) {
     return NextResponse.next();
   }
 
-  // Check for NextAuth session cookie (JWT strategy)
-  const sessionToken =
-    req.cookies.get("authjs.session-token")?.value ||
-    req.cookies.get("__Secure-authjs.session-token")?.value;
+  // Simple cookie check — NextAuth v5 JWT session cookie
+  const sessionToken = req.cookies.get("authjs.session-token")?.value;
 
   // Redirect unauthenticated users to login
   if (isAdminRoute && !isAdminLogin && !sessionToken) {
@@ -29,6 +27,10 @@ export default function middleware(req: NextRequest) {
 
   return NextResponse.next();
 }
+
+export const config = {
+  matcher: ["/admin/:path*", "/api/setup"],
+};
 
 export const config = {
   matcher: ["/admin/:path*", "/api/setup"],
