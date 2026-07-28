@@ -2,20 +2,11 @@ export const dynamic = "force-dynamic";
 
 import Link from "next/link";
 import { db } from "@/lib/db";
-import { products, categories, websiteSettings } from "@/db/schema";
-import { eq, desc, sql, asc } from "drizzle-orm";
-import { ProductCard } from "@/components/public/ProductCard";
-import { Button } from "@/components/ui/Button";
-import { formatPrice } from "@/lib/utils";
+import { products, categories } from "@/db/schema";
+import { eq, desc, asc, sql } from "drizzle-orm";
 
 async function getHomepageData() {
   try {
-    const allSettings = await db.select().from(websiteSettings).all();
-    const settingsMap: Record<string, string> = {};
-    allSettings.forEach((s) => {
-      settingsMap[s.key] = s.value || "";
-    });
-
     const activeCategories = await db
       .select()
       .from(categories)
@@ -26,48 +17,16 @@ async function getHomepageData() {
     const featuredProducts = await db
       .select()
       .from(products)
-      .where(
-        sql`${products.featured} = 1 AND ${products.status} = 'published'`
-      )
+      .where(sql`${products.featured} = 1 AND ${products.status} = 'published'`)
       .orderBy(desc(products.createdAt))
       .limit(8)
       .all();
 
-    const bestSellers = await db
-      .select()
-      .from(products)
-      .where(
-        sql`(${products.bestSeller} = 1 OR ${products.featured} = 1) AND ${products.status} = 'published'`
-      )
-      .orderBy(desc(products.bestSeller))
-      .limit(5)
-      .all();
-
-    const freeProducts = await db
-      .select()
-      .from(products)
-      .where(
-        sql`${products.productType} = 'FREE' AND ${products.status} = 'published'`
-      )
-      .orderBy(desc(products.createdAt))
-      .limit(4)
-      .all();
-
-    const readyMade = await db
-      .select()
-      .from(products)
-      .where(
-        sql`${products.productType} = 'READY_MADE' AND ${products.status} = 'published'`
-      )
-      .orderBy(desc(products.createdAt))
-      .limit(4)
-      .all();
-
-    // Attach primary image to each product
-    const attachImages = async (products: any[]) => {
+    // Attach images
+    const attachImages = async (items: any[]) => {
       const { productImages } = await import("@/db/schema");
       return Promise.all(
-        products.map(async (p) => {
+        items.map(async (p) => {
           const imgs = await db
             .select()
             .from(productImages)
@@ -80,220 +39,360 @@ async function getHomepageData() {
     };
 
     return {
-      settings: settingsMap,
       categories: activeCategories,
       featuredProducts: await attachImages(featuredProducts),
-      bestSellers: await attachImages(bestSellers),
-      freeProducts: await attachImages(freeProducts),
-      readyMade: await attachImages(readyMade),
     };
   } catch {
-    return {
-      settings: {},
-      categories: [],
-      featuredProducts: [],
-      bestSellers: [],
-      freeProducts: [],
-      readyMade: [],
-    };
+    return { categories: [], featuredProducts: [] };
   }
 }
 
 export default async function HomePage() {
-  const data = await getHomepageData();
-  const { settings, categories, featuredProducts, bestSellers, freeProducts, readyMade } = data;
+  const { categories: cats, featuredProducts: featured } = await getHomepageData();
 
   return (
     <div>
-      {/* Hero Section */}
-      <section className="relative overflow-hidden bg-gradient-to-br from-indigo-50 via-white to-purple-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 lg:py-32">
+      {/* ───────────── HERO ───────────── */}
+      <section className="relative min-h-screen flex items-center hero-gradient overflow-hidden pt-20">
+        <div className="absolute top-1/4 left-1/4 w-[500px] h-[500px] rounded-full bg-[var(--accent-gold)] opacity-[0.03] blur-[120px]" />
+        <div className="absolute bottom-1/4 right-1/4 w-[400px] h-[400px] rounded-full bg-[var(--accent-gold)] opacity-[0.02] blur-[100px]" />
+
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 lg:py-32 w-full">
           <div className="max-w-3xl">
-            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-gray-900 leading-[1.1] tracking-tight">
-              Digital Products.{' '}
-              <span className="text-indigo-600">Creative Solutions.</span>
-              {' '}Built for You.
+            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-[var(--border-gold)] text-[var(--accent-gold)] text-xs font-medium tracking-wider uppercase mb-6">
+              <span className="w-1.5 h-1.5 rounded-full bg-[var(--accent-gold)]" />
+              Premium Digital Products Marketplace
+            </div>
+
+            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold leading-[1.1] tracking-tight">
+              Ready-to-Use Digital Products for{" "}
+              <span className="gold-gradient">Business, Creators & Developers</span>
             </h1>
-            <p className="mt-6 text-lg sm:text-xl text-gray-600 leading-relaxed max-w-2xl">
-              Discover ready-to-use digital products, free resources, and custom digital solutions
-              designed to make your digital journey simpler, smarter, and more creative.
+
+            <p className="mt-6 text-lg sm:text-xl text-[var(--text-muted)] leading-relaxed max-w-2xl">
+              Buy professional website templates, management systems, Flutter apps, automation tools, and custom digital solutions that save weeks of work.
             </p>
-            <div className="flex flex-wrap gap-4 mt-8">
-              <Link href="/products">
-                <Button size="lg" className="text-base px-8">
-                  Explore Products
-                </Button>
-              </Link>
-              <Link href="/services">
-                <Button size="lg" variant="outline" className="text-base px-8">
-                  Build Something Custom
-                </Button>
-              </Link>
-            </div>
-          </div>
-        </div>
-        {/* Decorative gradient */}
-        <div className="absolute -top-24 -right-24 w-96 h-96 bg-indigo-200/30 rounded-full blur-3xl" />
-        <div className="absolute -bottom-24 -left-24 w-96 h-96 bg-purple-200/20 rounded-full blur-3xl" />
-      </section>
 
-      {/* Featured Categories */}
-      {categories.length > 0 && (
-        <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 lg:py-24">
-          <div className="flex items-center justify-between mb-10">
-            <h2 className="text-3xl font-bold text-gray-900">Categories</h2>
-            <Link href="/categories" className="text-sm font-medium text-indigo-600 hover:text-indigo-700">
-              View All →
-            </Link>
-          </div>
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
-            {categories.map((cat) => (
-              <Link
-                key={cat.id}
-                href={`/categories/${cat.slug}`}
-                className="p-6 rounded-xl border border-gray-100 text-center hover:border-indigo-200 hover:shadow-md transition-all bg-white group"
+            <div className="flex flex-wrap gap-4 mt-10">
+              <a
+                href="#products"
+                className="btn-gold inline-flex items-center justify-center gap-2 px-8 py-3.5 rounded-xl text-base font-semibold"
               >
-                <div className="w-12 h-12 mx-auto rounded-full bg-indigo-50 flex items-center justify-center text-indigo-600 text-xl group-hover:bg-indigo-100 transition-colors">
-                  {cat.icon || "📁"}
-                </div>
-                <h3 className="font-medium text-gray-900 mt-3 text-sm">{cat.name}</h3>
-              </Link>
-            ))}
-          </div>
-        </section>
-      )}
+                Explore Products
+                <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M19 14l-7 7m0 0l-7-7m7 7V3" />
+                </svg>
+              </a>
+              <a
+                href="https://wa.me/911234567890?text=Hi%20Scrollzea%2C%20I%20want%20a%20custom%20digital%20solution%20for%20my%20business."
+                target="_blank"
+                rel="noopener noreferrer"
+                className="btn-ghost-gold inline-flex items-center justify-center gap-2 px-8 py-3.5 rounded-xl text-base font-medium"
+              >
+                Build Something Custom
+                <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3" />
+                </svg>
+              </a>
+            </div>
 
-      {/* Best Sellers */}
-      {bestSellers.length > 0 && (
-        <section className="bg-gray-50 py-16 lg:py-24">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="flex items-center justify-between mb-10">
-              <h2 className="text-3xl font-bold text-gray-900">Best Sellers</h2>
-              <Link href="/products" className="text-sm font-medium text-indigo-600 hover:text-indigo-700">
-                View All →
-              </Link>
-            </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6">
-              {bestSellers.map((product) => (
-                <ProductCard key={product.id} product={product} />
-              ))}
-            </div>
-          </div>
-        </section>
-      )}
-
-      {/* Free Resources */}
-      {freeProducts.length > 0 && (
-        <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 lg:py-24">
-          <div className="flex items-center justify-between mb-10">
-            <h2 className="text-3xl font-bold text-gray-900">Free Resources</h2>
-            <Link href="/freebies" className="text-sm font-medium text-emerald-600 hover:text-emerald-700">
-              View All →
-            </Link>
-          </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {freeProducts.map((product) => (
-              <ProductCard key={product.id} product={product} />
-            ))}
-          </div>
-        </section>
-      )}
-
-      {/* Ready-Made Products */}
-      {readyMade.length > 0 && (
-        <section className="bg-gray-50 py-16 lg:py-24">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="flex items-center justify-between mb-10">
-              <h2 className="text-3xl font-bold text-gray-900">Ready-to-Use Digital Products</h2>
-              <Link href="/products" className="text-sm font-medium text-indigo-600 hover:text-indigo-700">
-                View All →
-              </Link>
-            </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-              {readyMade.map((product) => (
-                <ProductCard key={product.id} product={product} />
-              ))}
-            </div>
-          </div>
-        </section>
-      )}
-
-      {/* How It Works */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 lg:py-24">
-        <h2 className="text-3xl font-bold text-center text-gray-900 mb-14">How It Works</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
-          {/* Ready-made flow */}
-          <div className="p-8 rounded-2xl border border-gray-100 bg-white">
-            <div className="w-12 h-12 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-600 text-xl mb-4">
-              🛒
-            </div>
-            <h3 className="text-xl font-semibold text-gray-900 mb-4">Ready-Made Products</h3>
-            <div className="flex items-center gap-2 text-sm text-gray-500 flex-wrap">
-              <span className="px-3 py-1.5 bg-indigo-50 text-indigo-700 rounded-lg font-medium">Browse</span>
-              <span className="text-gray-300">→</span>
-              <span className="px-3 py-1.5 bg-indigo-50 text-indigo-700 rounded-lg font-medium">Choose</span>
-              <span className="text-gray-300">→</span>
-              <span className="px-3 py-1.5 bg-indigo-50 text-indigo-700 rounded-lg font-medium">Pay</span>
-              <span className="text-gray-300">→</span>
-              <span className="px-3 py-1.5 bg-indigo-50 text-indigo-700 rounded-lg font-medium">Get Product</span>
-            </div>
-          </div>
-
-          {/* Custom services flow */}
-          <div className="p-8 rounded-2xl border border-gray-100 bg-white">
-            <div className="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 text-xl mb-4">
-              🎨
-            </div>
-            <h3 className="text-xl font-semibold text-gray-900 mb-4">Custom Services</h3>
-            <div className="flex items-center gap-2 text-sm text-gray-500 flex-wrap">
-              <span className="px-3 py-1.5 bg-blue-50 text-blue-700 rounded-lg font-medium">Choose Service</span>
-              <span className="text-gray-300">→</span>
-              <span className="px-3 py-1.5 bg-blue-50 text-blue-700 rounded-lg font-medium">Pre-book (30%)</span>
-              <span className="text-gray-300">→</span>
-              <span className="px-3 py-1.5 bg-blue-50 text-blue-700 rounded-lg font-medium">Development</span>
-              <span className="text-gray-300">→</span>
-              <span className="px-3 py-1.5 bg-blue-50 text-blue-700 rounded-lg font-medium">Delivery</span>
+            <div className="mt-16 flex flex-wrap items-center gap-8 text-sm text-[var(--text-dim)]">
+              <div className="flex items-center gap-2">
+                <span className="text-[var(--accent-gold)]">✓</span>
+                Instant Download
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="text-[var(--accent-gold)]">✓</span>
+                Secure Payment
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="text-[var(--accent-gold)]">✓</span>
+                Premium Quality
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="text-[var(--accent-gold)]">✓</span>
+                WhatsApp Support
+              </div>
             </div>
           </div>
         </div>
       </section>
 
-      {/* Why Scrollzea */}
-      <section className="bg-gray-50 py-16 lg:py-24">
+      {/* ───────────── FEATURED PRODUCTS ───────────── */}
+      <section id="products" className="section-dark-2 py-20 lg:py-28">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h2 className="text-3xl font-bold text-center text-gray-900 mb-14">Why Scrollzea</h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="text-center max-w-2xl mx-auto mb-16">
+            <span className="section-label">What We Offer</span>
+            <h2 className="text-3xl lg:text-4xl font-bold mt-6 mb-4">
+              Featured <span className="gold-gradient">Digital Products</span>
+            </h2>
+            <p className="text-[var(--text-muted)] leading-relaxed">
+              Production-ready templates, apps, and systems — instantly downloadable after purchase.
+            </p>
+          </div>
+
+          {featured.length > 0 ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+              {featured.map((product, i) => (
+                <Link
+                  key={product.id}
+                  href={`/products/${product.slug}`}
+                  className="product-card group animate-fade-in-up"
+                  style={{ animationDelay: `${(i % 4) * 100}ms` }}
+                >
+                  <div className="aspect-[4/3] bg-[var(--bg-secondary)] overflow-hidden">
+                    {product.images?.[0] ? (
+                      <img src={product.images[0].imageUrl} alt={product.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                    ) : (
+                      <div className="w-full h-full bg-gradient-to-br from-[var(--accent-glow)] to-transparent flex items-center justify-center">
+                        <span className="text-5xl opacity-20">
+                          {product.productType === "FREE" ? "🎁" : product.productType === "PREBOOK" ? "🛠" : "📦"}
+                        </span>
+                      </div>
+                    )}
+                  </div>
+                  <div className="p-5">
+                    <h3 className="font-semibold text-base text-[var(--text-primary)] line-clamp-1">{product.name}</h3>
+                    <p className="text-sm text-[var(--text-muted)] mt-1.5 line-clamp-2 leading-relaxed">
+                      {product.shortDescription}
+                    </p>
+                    <div className="flex items-center justify-between mt-4 pt-4 border-t border-[var(--border-gold)]/30">
+                      <span className="font-bold text-[var(--accent-gold)]">
+                        {product.price === 0 ? "Free" : `₹${product.price.toLocaleString("en-IN")}`}
+                      </span>
+                      <span className="text-xs text-[var(--text-dim)] group-hover:text-[var(--accent-gold)] transition-colors">View Details →</span>
+                    </div>
+                  </div>
+                </Link>
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-16">
+              <p className="text-[var(--text-muted)]">Products coming soon.</p>
+            </div>
+          )}
+
+          <div className="text-center mt-12">
+            <Link
+              href="/products"
+              className="btn-ghost-gold inline-flex items-center gap-2 px-8 py-3 rounded-xl text-sm font-medium"
+            >
+              View All Products
+              <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3" />
+              </svg>
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      {/* ───────────── CATEGORIES ───────────── */}
+      {cats.length > 0 && (
+        <section className="section-dark py-20 lg:py-28">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="text-center max-w-2xl mx-auto mb-16">
+              <span className="section-label">Browse By</span>
+              <h2 className="text-3xl lg:text-4xl font-bold mt-6 mb-4">
+                Product <span className="gold-gradient">Categories</span>
+              </h2>
+              <p className="text-[var(--text-muted)] leading-relaxed">
+                Find exactly what you need from our curated categories.
+              </p>
+            </div>
+
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
+              {cats.map((cat, i) => (
+                <Link
+                  key={cat.id}
+                  href={`/categories/${cat.slug}`}
+                  className="glass-card p-6 sm:p-8 text-center group animate-fade-in-up"
+                  style={{ animationDelay: `${i * 80}ms` }}
+                >
+                  <div className="w-14 h-14 mx-auto rounded-full bg-[var(--accent-glow)] flex items-center justify-center text-2xl group-hover:scale-110 transition-transform duration-300">
+                    {cat.icon || "📁"}
+                  </div>
+                  <h3 className="font-medium text-sm text-[var(--text-primary)] mt-4">{cat.name}</h3>
+                </Link>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* ───────────── HOW IT WORKS ───────────── */}
+      <section className="section-dark-2 py-20 lg:py-28">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center max-w-2xl mx-auto mb-16">
+            <span className="section-label">Simple Process</span>
+            <h2 className="text-3xl lg:text-4xl font-bold mt-6 mb-4">
+              How It <span className="gold-gradient">Works</span>
+            </h2>
+            <p className="text-[var(--text-muted)] leading-relaxed">
+              Get started in minutes, not days.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
             {[
-              { icon: "📦", title: "Ready-to-Use Products", desc: "Instant access to digital products that you can use right away." },
-              { icon: "🎯", title: "Custom Digital Solutions", desc: "Tailored services built specifically for your needs." },
-              { icon: "🔒", title: "Secure Payments", desc: "Pay securely through Razorpay or PayPal. Your data is protected." },
-              { icon: "💬", title: "Professional Support", desc: "Get help when you need it. We're here to assist you." },
-              { icon: "⚡", title: "Digital-First Experience", desc: "Fast, seamless, and optimized for the modern digital world." },
-              { icon: "🤝", title: "Easy Communication", desc: "Connect with us via WhatsApp, email, or our contact form." },
-            ].map((item) => (
-              <div key={item.title} className="p-6 rounded-xl bg-white border border-gray-100">
-                <span className="text-3xl">{item.icon}</span>
-                <h3 className="font-semibold text-gray-900 mt-3">{item.title}</h3>
-                <p className="text-sm text-gray-500 mt-2 leading-relaxed">{item.desc}</p>
+              { num: "01", title: "Browse Products", desc: "Explore our collection of templates, apps, systems, and automation tools." },
+              { num: "02", title: "Purchase Securely", desc: "Pay using Razorpay or PayPal — your payment is always protected." },
+              { num: "03", title: "Instant Access", desc: "Receive download access immediately after payment confirmation." },
+              { num: "04", title: "Get Support", desc: "We help you install, configure, and use every product you buy." },
+            ].map((step, i) => (
+              <div
+                key={step.num}
+                className="glass-card p-8 animate-fade-in-up"
+                style={{ animationDelay: `${i * 120}ms` }}
+              >
+                <div className="step-number">{step.num}</div>
+                <h3 className="text-lg font-semibold text-[var(--text-primary)] mt-5">{step.title}</h3>
+                <p className="text-sm text-[var(--text-muted)] mt-2 leading-relaxed">{step.desc}</p>
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* Contact CTA */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 lg:py-24 text-center">
-        <div className="max-w-2xl mx-auto">
-          <h2 className="text-3xl font-bold text-gray-900">Let's Create Something Great Together</h2>
-          <p className="mt-4 text-lg text-gray-600">
-            Have a project in mind? Get in touch and let's discuss how Scrollzea can bring your ideas to life.
+      {/* ───────────── WHY SCROLLZEA ───────────── */}
+      <section className="section-dark py-20 lg:py-28">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center max-w-2xl mx-auto mb-16">
+            <span className="section-label">Why Choose Us</span>
+            <h2 className="text-3xl lg:text-4xl font-bold mt-6 mb-4">
+              Built for <span className="gold-gradient">Professionals</span>
+            </h2>
+            <p className="text-[var(--text-muted)] leading-relaxed">
+              Every product is production-ready, tested, and backed by real support.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            {[
+              { icon: "⚡", title: "Production Ready", desc: "Not demo files or starter kits — fully functional products you can use immediately." },
+              { icon: "🚀", title: "Fast Delivery", desc: "Instant downloads for digital products and quick turnaround on custom orders." },
+              { icon: "📱", title: "Mobile Optimized", desc: "Every product works seamlessly on phones, tablets, and desktops." },
+              { icon: "💬", title: "Real Support", desc: "Direct assistance via WhatsApp and email, from real people who know the product." },
+            ].map((item, i) => (
+              <div
+                key={item.title}
+                className="glass-card p-8 animate-fade-in-up text-center"
+                style={{ animationDelay: `${i * 100}ms` }}
+              >
+                <div className="w-16 h-16 mx-auto rounded-full bg-[var(--accent-glow)] flex items-center justify-center text-3xl">
+                  {item.icon}
+                </div>
+                <h3 className="font-semibold text-[var(--text-primary)] text-lg mt-5">{item.title}</h3>
+                <p className="text-sm text-[var(--text-muted)] mt-2 leading-relaxed">{item.desc}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ───────────── TESTIMONIALS ───────────── */}
+      <section className="section-dark-2 py-20 lg:py-28">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center max-w-2xl mx-auto mb-16">
+            <span className="section-label">Testimonials</span>
+            <h2 className="text-3xl lg:text-4xl font-bold mt-6 mb-4">
+              What Clients <span className="gold-gradient">Say</span>
+            </h2>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {[
+              { name: "Amit S.", role: "Business Owner", text: "The hostel management system transformed our operations. Installation was smooth and the support team was incredibly helpful." },
+              { name: "Priya R.", role: "Freelance Designer", text: "I purchased the portfolio template — clean code, great design, easy to customize. Highly recommended." },
+              { name: "Rahul K.", role: "Startup Founder", text: "Custom app development was seamless. They understood our requirements and delivered ahead of schedule." },
+            ].map((t, i) => (
+              <div
+                key={t.name}
+                className="glass-card p-8 animate-fade-in-up"
+                style={{ animationDelay: `${i * 100}ms` }}
+              >
+                <div className="flex items-center gap-1 text-[var(--accent-gold)] mb-4">
+                  {[...Array(5)].map((_, s) => (
+                    <svg key={s} className="h-4 w-4 fill-current" viewBox="0 0 20 20">
+                      <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                    </svg>
+                  ))}
+                </div>
+                <p className="text-sm text-[var(--text-muted)] leading-relaxed italic">"{t.text}"</p>
+                <div className="mt-5 pt-4 border-t border-[var(--border-gold)]/30">
+                  <p className="font-semibold text-sm text-[var(--text-primary)]">{t.name}</p>
+                  <p className="text-xs text-[var(--text-dim)]">{t.role}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ───────────── FAQ ───────────── */}
+      <section className="section-dark py-20 lg:py-28">
+        <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center max-w-2xl mx-auto mb-16">
+            <span className="section-label">FAQ</span>
+            <h2 className="text-3xl lg:text-4xl font-bold mt-6 mb-4">
+              Frequently Asked <span className="gold-gradient">Questions</span>
+            </h2>
+          </div>
+
+          <div className="space-y-4">
+            {[
+              { q: "What types of products does Scrollzea offer?", a: "We offer ready-to-use digital products including website templates, Flutter apps, management systems (hostel, hospital, inventory), automation tools, and custom development services." },
+              { q: "How do I receive my purchase?", a: "After successful payment, you get instant download access. For custom projects, we deliver the completed work within the agreed timeline." },
+              { q: "Can I request modifications to a product?", a: "Ready-made products are sold as-is. However, we offer custom development services for tailored solutions." },
+              { q: "What payment methods are accepted?", a: "We accept Razorpay (UPI, cards, netbanking) and PayPal for international customers. All transactions are secure." },
+              { q: "Do you provide support after purchase?", a: "Yes! Every purchase includes support via WhatsApp and email. We help with installation, setup, and troubleshooting." },
+              { q: "What is the pre-book process for custom projects?", a: "Pre-book with 30% advance, we start development, and you pay the remaining 70% on delivery. Contact us to discuss your project." },
+            ].map((faq, i) => (
+              <details
+                key={i}
+                className="glass-card group open:border-[var(--border-gold-hover)] animate-fade-in-up"
+                style={{ animationDelay: `${i * 80}ms` }}
+              >
+                <summary className="flex items-center justify-between px-6 py-5 cursor-pointer list-none">
+                  <span className="font-medium text-sm text-[var(--text-primary)] pr-4">{faq.q}</span>
+                  <svg className="h-4 w-4 text-[var(--accent-gold)] shrink-0 transition-transform duration-200 group-open:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+                  </svg>
+                </summary>
+                <div className="px-6 pb-5 border-t border-[var(--border-gold)]/30">
+                  <p className="text-sm text-[var(--text-muted)] pt-4 leading-relaxed">{faq.a}</p>
+                </div>
+              </details>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ───────────── FINAL CTA ───────────── */}
+      <section className="section-dark-2 py-20 lg:py-28 relative overflow-hidden">
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] rounded-full bg-[var(--accent-gold)] opacity-[0.02] blur-[150px]" />
+
+        <div className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative">
+          <span className="section-label">Get Started</span>
+          <h2 className="text-3xl lg:text-4xl font-bold mt-6 mb-4">
+            Ready to Build Something <span className="gold-gradient">Great?</span>
+          </h2>
+          <p className="text-[var(--text-muted)] leading-relaxed max-w-lg mx-auto">
+            Browse our products or tell us about your custom project. We're here to help.
           </p>
-          <div className="flex flex-wrap justify-center gap-4 mt-8">
-            <Link href="/contact">
-              <Button size="lg">Contact Us</Button>
+          <div className="flex flex-wrap justify-center gap-4 mt-10">
+            <Link
+              href="/products"
+              className="btn-gold inline-flex items-center gap-2 px-8 py-3.5 rounded-xl text-base font-semibold"
+            >
+              Browse Products
             </Link>
-            <a href="https://wa.me/91" target="_blank" rel="noopener noreferrer">
-              <Button size="lg" variant="outline">Chat on WhatsApp</Button>
+            <a
+              href="https://wa.me/911234567890?text=Hi%20Scrollzea%2C%20I%20want%20a%20custom%20digital%20solution%20for%20my%20business."
+              target="_blank"
+              rel="noopener noreferrer"
+              className="btn-ghost-gold inline-flex items-center gap-2 px-8 py-3.5 rounded-xl text-base font-medium"
+            >
+              Chat on WhatsApp
             </a>
           </div>
         </div>
