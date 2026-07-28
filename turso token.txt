@@ -11,6 +11,18 @@ libsql://scrollzea-soulyantra.aws-ap-south-1.turso.io
 
 ==============================================================================
 
+Instructions:
+
+1. Go to https://scrollzea2026.vercel.app/admin
+2. Enter: admin@scrollzea.com
+3. Password: scrollzeaAdmin2024!
+4. Click Sign In → should redirect to dashboard
+
+
+
+
+================================================================================
+
 Credentials:
 - Email: srollzea@gmail.com
 - Password: scrollzeaAdmin2024!

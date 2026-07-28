@@ -1,120 +1,92 @@
 "use client";
 
 import { useState, FormEvent, useEffect } from "react";
-import { useRouter } from "next/navigation";
-import { Button } from "@/components/ui/Button";
+import { signIn } from "next-auth/react";
 
 export default function AdminLoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
-  const [loading, setLoading] = useState(false);
-  const router = useRouter();
 
-  // Check if already authenticated — redirect to dashboard
+  // Check URL for error param (redirected back after failed auth)
   useEffect(() => {
-    fetch("/api/auth/session")
-      .then((r) => r.json())
-      .then((session) => {
-        if (session?.user) {
-          router.replace("/admin/dashboard");
-        }
-      })
-      .catch(() => {});
-  }, [router]);
-
-  const handleSubmit = (e: FormEvent) => {
-    e.preventDefault();
-    setLoading(true);
-    setError("");
-
-    // Step 1: Get CSRF token — this also sets the CSRF cookie in the browser
-    fetch("/api/auth/csrf")
-      .then((r) => r.json())
-      .then((data) => {
-        // Step 2: Submit a native HTML form with the CSRF token
-        // Native form submission includes cookies automatically
-        const form = document.createElement("form");
-        form.method = "POST";
-        form.action = "/api/auth/callback/credentials";
-        form.style.display = "none";
-
-        const addField = (name: string, value: string) => {
-          const input = document.createElement("input");
-          input.type = "hidden";
-          input.name = name;
-          input.value = value;
-          form.appendChild(input);
-        };
-
-        addField("csrfToken", data.csrfToken);
-        addField("email", email.trim());
-        addField("password", password);
-        addField("callbackUrl", "/admin/dashboard");
-
-        document.body.appendChild(form);
-        form.submit();
-        // On success, browser redirects to /admin/dashboard
-        // On failure, browser redirects to /admin?error=CredentialsSignin
-      })
-      .catch(() => {
-        setError("Could not connect to server. Please try again.");
-        setLoading(false);
-      });
-  };
-
-  // Show URL error param (redirected back after failed login)
-  useEffect(() => {
-    const urlError = new URLSearchParams(window.location.search).get("error");
-    if (urlError) {
-      if (urlError === "CredentialsSignin") {
-        setError("Invalid email or password");
-      } else {
-        setError("Login failed: " + urlError);
-      }
-      // Clean URL
+    const params = new URLSearchParams(window.location.search);
+    const urlError = params.get("error");
+    if (urlError === "CredentialsSignin") {
+      setError("Invalid email or password");
       window.history.replaceState({}, "", "/admin");
     }
   }, []);
 
+  const handleSubmit = (e: FormEvent) => {
+    e.preventDefault();
+    // Full page redirect — NextAuth handles cookies natively
+    signIn("credentials", {
+      email: email.trim(),
+      password,
+      callbackUrl: "/admin/dashboard",
+    });
+  };
+
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
-      <div className="w-full max-w-md">
+    <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: "#071B14" }}>
+      <div className="w-full max-w-md px-4">
         <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-indigo-600">Scrollzea</h1>
-          <p className="text-gray-500 mt-2">Admin Sign In</p>
+          <img src="/logo.jpg" alt="Scrollzea" className="h-14 w-auto mx-auto mb-4" />
+          <h1 className="text-2xl font-bold" style={{ color: "#D4AF37" }}>Admin Panel</h1>
+          <p className="text-sm mt-1" style={{ color: "#B8C2BE" }}>Sign in to manage your store</p>
         </div>
-        <div className="bg-white rounded-2xl border border-gray-100 p-8 shadow-sm">
+
+        <div
+          className="rounded-2xl p-8"
+          style={{ backgroundColor: "#0D241D", border: "1px solid rgba(212,175,55,0.15)" }}
+        >
           {error && (
-            <div className="mb-4 p-3 bg-red-50 text-red-700 rounded-lg text-sm">{error}</div>
+            <div className="mb-4 p-3 rounded-lg text-sm" style={{ backgroundColor: "rgba(239,68,68,0.1)", color: "#EF4444" }}>
+              {error}
+            </div>
           )}
+
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1.5">Email</label>
+              <label className="block text-sm font-medium mb-1.5" style={{ color: "#B8C2BE" }}>Email</label>
               <input
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder="srollzea@gmail.com"
+                placeholder="admin@scrollzea.com"
                 required
-                className="w-full px-4 py-2.5 rounded-lg border border-gray-200 text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200"
+                className="w-full px-4 py-2.5 rounded-lg text-sm"
+                style={{ backgroundColor: "#071B14", border: "1px solid rgba(212,175,55,0.2)", color: "#FFFFFF" }}
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1.5">Password</label>
+              <label className="block text-sm font-medium mb-1.5" style={{ color: "#B8C2BE" }}>Password</label>
               <input
                 type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                placeholder="Enter your password"
+                placeholder="Enter password"
                 required
-                className="w-full px-4 py-2.5 rounded-lg border border-gray-200 text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200"
+                className="w-full px-4 py-2.5 rounded-lg text-sm"
+                style={{ backgroundColor: "#071B14", border: "1px solid rgba(212,175,55,0.2)", color: "#FFFFFF" }}
               />
             </div>
-            <Button type="submit" loading={loading} className="w-full">
+            <button
+              type="submit"
+              className="w-full py-2.5 rounded-lg text-sm font-semibold transition-all hover:opacity-90"
+              style={{
+                background: "linear-gradient(135deg, #D4AF37, #F4D06F)",
+                color: "#071B14",
+              }}
+            >
               Sign In
-            </Button>
+            </button>
           </form>
+
+          <div className="mt-6 text-xs text-center" style={{ color: "#6B7B76" }}>
+            <p>admin@scrollzea.com / scrollzeaAdmin2024!</p>
+          </div>
         </div>
       </div>
     </div>
