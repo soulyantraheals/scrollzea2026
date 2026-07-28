@@ -1,0 +1,29 @@
+https://scrollzea2026.vercel.app
+https://scrollzea2026.vercel.app/admin/login
+==================================================================
+token expires never, read n write
+
+eyJhbGciOiJFZERTQSIsInR5cCI6IkpXVCJ9.eyJhIjoicnciLCJpYXQiOjE3ODUyNTkxNDEsImlkIjoiMDE5ZmE5YjktZmYwMS03ZDVjLTg4MTAtMzcxMzM3MTc5Y2JlIiwia2lkIjoickVOM2drNzU0eENSX1NDeEpoRVZ2cmsyVGhtUUY0T0I4dWxJRkVyVnVRZyIsInJpZCI6IjA2ZjQzNzI5LWFhZDEtNGFhOC1iNjQxLWRmYjAzZWVmNjNmNiJ9.JIbTcLMIMDoQSxgn4FZjJSdmBk6oey0v2GZjiT8a5sPRLYHdPQxxESyeBg9_wl3T9rDN_Cau3_xnemJ7qrsjBw
+
+
+
+libsql://scrollzea-soulyantra.aws-ap-south-1.turso.io
+
+==============================================================================
+
+Credentials:
+- Email: srollzea@gmail.com
+- Password: scrollzeaAdmin2024!
+
+⚠️ Change the password immediately after first login!
+
+What you need to set up still (optional):
+
+1. Resend API Key — for contact form emails (set via vercel env add RESEND_API_KEY production)
+2. Uploadthing keys — for image uploads (set via vercel env add UPLOADTHING_SECRET production and UPLOADTHING_APP_ID production)
+3. Run seed data — npx tsx scripts/seed.ts (from your local machine) to populate demo products
+4. Custom domain — You can add your own domain in Vercel dashboard → scrollzea2026 → Domains
+
+✻ Baked for 17m 52s
+
+※ recap: Scrollzea website is deployed live at https://scrollzea2026.vercel.app with all build errors fixed, middleware fixed for Vercel, database pushed, admin login working. Your next step is to change the admin password after logging in at /admin/login (email: srollzea@gmail.com, password: scrollzeaAdmin2024!).

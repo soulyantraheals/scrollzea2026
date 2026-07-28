@@ -1,7 +1,6 @@
 "use client";
 
-import { useState } from "react";
-import { signIn } from "next-auth/react";
+import { useState, FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
@@ -13,21 +12,43 @@ export default function AdminLoginPage() {
   const [loading, setLoading] = useState(false);
   const router = useRouter();
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setError("");
 
-    const result = await signIn("credentials", {
-      email,
-      password,
-      redirect: false,
-    });
+    try {
+      // Get CSRF token first
+      const csrfRes = await fetch("/api/auth/csrf");
+      const { csrfToken } = await csrfRes.json();
 
-    if (result?.ok) {
-      router.push("/admin");
-    } else {
-      setError("Invalid email or password");
+      // POST credentials with CSRF token
+      const res = await fetch("/api/auth/callback/credentials", {
+        method: "POST",
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        body: new URLSearchParams({
+          email,
+          password,
+          csrfToken,
+          callbackUrl: "/admin",
+        }),
+        redirect: "manual",
+      });
+
+      if (res.status === 302) {
+        window.location.href = "/admin";
+        return;
+      }
+
+      const text = await res.text();
+      if (text.includes("CredentialsSignin")) {
+        setError("Invalid email or password");
+      } else {
+        setError("Login failed. Please check your credentials.");
+      }
+    } catch (err) {
+      console.error("Login error:", err);
+      setError("Something went wrong. Please try again.");
     }
     setLoading(false);
   };

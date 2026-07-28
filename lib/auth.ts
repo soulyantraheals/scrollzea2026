@@ -14,26 +14,43 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         password: { label: "Password", type: "password" },
       },
       async authorize(credentials) {
-        if (!credentials?.email || !credentials?.password) return null;
+        try {
+          if (!credentials?.email || !credentials?.password) {
+            console.error("[auth] Missing email or password");
+            return null;
+          }
 
-        const user = await db
-          .select()
-          .from(adminUsers)
-          .where(eq(adminUsers.email, credentials.email as string))
-          .get();
+          const user = await db
+            .select()
+            .from(adminUsers)
+            .where(eq(adminUsers.email, credentials.email as string))
+            .get();
 
-        if (!user) return null;
+          if (!user) {
+            console.error("[auth] User not found:", credentials.email);
+            return null;
+          }
 
-        const isValid = await compare(credentials.password as string, user.passwordHash);
-        if (!isValid) return null;
+          if (user.status !== "active") {
+            console.error("[auth] User inactive:", user.status);
+            return null;
+          }
 
-        if (user.status !== "active") return null;
+          const isValid = await compare(credentials.password as string, user.passwordHash);
+          if (!isValid) {
+            console.error("[auth] Password mismatch for:", credentials.email);
+            return null;
+          }
 
-        return {
-          id: String(user.id),
-          email: user.email,
-          name: user.name,
-        };
+          return {
+            id: String(user.id),
+            email: user.email,
+            name: user.name,
+          };
+        } catch (err) {
+          console.error("[auth] authorize error:", err);
+          return null;
+        }
       },
     }),
   ],
