@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, FormEvent, useEffect } from "react";
-import { signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/Button";
 
@@ -24,37 +23,59 @@ export default function AdminLoginPage() {
       .catch(() => {});
   }, [router]);
 
-  const handleSubmit = async (e: FormEvent) => {
+  const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setError("");
 
-    try {
-      const result = await signIn("credentials", {
-        email: email.trim(),
-        password,
-        redirect: false,
-      });
+    // Step 1: Get CSRF token — this also sets the CSRF cookie in the browser
+    fetch("/api/auth/csrf")
+      .then((r) => r.json())
+      .then((data) => {
+        // Step 2: Submit a native HTML form with the CSRF token
+        // Native form submission includes cookies automatically
+        const form = document.createElement("form");
+        form.method = "POST";
+        form.action = "/api/auth/callback/credentials";
+        form.style.display = "none";
 
-      if (result?.error) {
-        if (result.error === "CredentialsSignin") {
-          setError("Invalid email or password");
-        } else {
-          setError("Login failed: " + result.error);
-        }
+        const addField = (name: string, value: string) => {
+          const input = document.createElement("input");
+          input.type = "hidden";
+          input.name = name;
+          input.value = value;
+          form.appendChild(input);
+        };
+
+        addField("csrfToken", data.csrfToken);
+        addField("email", email.trim());
+        addField("password", password);
+        addField("callbackUrl", "/admin/dashboard");
+
+        document.body.appendChild(form);
+        form.submit();
+        // On success, browser redirects to /admin/dashboard
+        // On failure, browser redirects to /admin?error=CredentialsSignin
+      })
+      .catch(() => {
+        setError("Could not connect to server. Please try again.");
         setLoading(false);
-      } else if (result?.ok) {
-        router.replace("/admin/dashboard");
-      } else {
-        setError("Login failed. Please try again.");
-        setLoading(false);
-      }
-    } catch (err) {
-      console.error("[login] unexpected error:", err);
-      setError("Something went wrong. Please try again.");
-      setLoading(false);
-    }
+      });
   };
+
+  // Show URL error param (redirected back after failed login)
+  useEffect(() => {
+    const urlError = new URLSearchParams(window.location.search).get("error");
+    if (urlError) {
+      if (urlError === "CredentialsSignin") {
+        setError("Invalid email or password");
+      } else {
+        setError("Login failed: " + urlError);
+      }
+      // Clean URL
+      window.history.replaceState({}, "", "/admin");
+    }
+  }, []);
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
@@ -74,7 +95,7 @@ export default function AdminLoginPage() {
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder="admin@example.com"
+                placeholder="srollzea@gmail.com"
                 required
                 className="w-full px-4 py-2.5 rounded-lg border border-gray-200 text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200"
               />
