@@ -9,7 +9,7 @@ import {
 } from "lucide-react";
 
 const navItems = [
-  { href: "/admin", label: "Dashboard", icon: LayoutDashboard },
+  { href: "/admin/dashboard", label: "Dashboard", icon: LayoutDashboard },
   { href: "/admin/products", label: "Products", icon: Package },
   { href: "/admin/categories", label: "Categories", icon: FolderTree },
   { href: "/admin/leads", label: "Leads", icon: MessageSquare },
@@ -28,15 +28,16 @@ export function Sidebar({ open, onClose }: { open: boolean; onClose: () => void 
       {open && <div className="fixed inset-0 bg-black/50 z-40 lg:hidden" onClick={onClose} />}
       <aside
         className={cn(
-          "fixed top-0 left-0 z-50 h-full w-64 bg-white border-r border-gray-200 transform transition-transform duration-200 lg:translate-x-0",
+          "fixed top-0 left-0 z-50 h-full w-64 transform transition-transform duration-200 lg:translate-x-0",
           open ? "translate-x-0" : "-translate-x-full"
         )}
+        style={{ backgroundColor: "#071B14", borderRight: "1px solid rgba(212,175,55,0.15)" }}
       >
-        <div className="flex items-center justify-between p-6 border-b">
+        <div className="flex items-center justify-between px-6 py-5" style={{ borderBottom: "1px solid rgba(212,175,55,0.15)" }}>
           <Link href="/admin/dashboard">
             <img src="/logo.jpg" alt="Scrollzea" className="h-7 w-auto object-contain" />
           </Link>
-          <button onClick={onClose} className="lg:hidden p-1 hover:bg-gray-100 rounded">
+          <button onClick={onClose} className="lg:hidden p-1 rounded" style={{ color: "#B8C2BE" }}>
             <X className="h-5 w-5" />
           </button>
         </div>
@@ -52,9 +53,10 @@ export function Sidebar({ open, onClose }: { open: boolean; onClose: () => void 
                 className={cn(
                   "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors",
                   isActive
-                    ? "bg-indigo-50 text-indigo-700"
-                    : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
+                    ? "text-[#D4AF37]"
+                    : "text-[#6B7B76] hover:text-[#D4AF37]"
                 )}
+                style={isActive ? { backgroundColor: "rgba(212,175,55,0.1)" } : {}}
               >
                 <Icon className="h-5 w-5" />
                 {item.label}
