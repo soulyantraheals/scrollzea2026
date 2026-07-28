@@ -8,6 +8,15 @@ const nextConfig: NextConfig = {
       { protocol: "https", hostname: "**" },
     ],
   },
+  async redirects() {
+    return [
+      {
+        source: "/admin/login",
+        destination: "/admin",
+        permanent: true,
+      },
+    ];
+  },
 };
 
 export default nextConfig;
