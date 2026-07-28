@@ -53,9 +53,9 @@ export function Header() {
           {/* Logo */}
           <Link href="/" className="flex items-center gap-3 group">
             <img
-              src="/logo.png"
+              src="/logo.jpg"
               alt="Scrollzea"
-              className="h-8 lg:h-9 w-auto transition-transform duration-300 group-hover:scale-105"
+              className="h-8 lg:h-9 w-auto object-contain transition-transform duration-300 group-hover:scale-105"
             />
           </Link>
 

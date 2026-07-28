@@ -13,7 +13,7 @@ export function Footer() {
           {/* Brand */}
           <div className="lg:col-span-1">
             <Link href="/" className="inline-block">
-              <img src="/logo.png" alt="Scrollzea" className="h-9 w-auto" />
+              <img src="/logo.jpg" alt="Scrollzea" className="h-9 w-auto object-contain" />
             </Link>
             <p className="mt-4 text-sm text-[var(--text-muted)] leading-relaxed max-w-xs">
               Premium digital products, templates, and custom digital solutions for businesses, creators, and developers.

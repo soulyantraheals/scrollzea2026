@@ -33,7 +33,9 @@ export function Sidebar({ open, onClose }: { open: boolean; onClose: () => void 
         )}
       >
         <div className="flex items-center justify-between p-6 border-b">
-          <Link href="/admin" className="text-xl font-bold text-indigo-600">Scrollzea</Link>
+          <Link href="/admin/dashboard">
+            <img src="/logo.jpg" alt="Scrollzea" className="h-7 w-auto object-contain" />
+          </Link>
           <button onClick={onClose} className="lg:hidden p-1 hover:bg-gray-100 rounded">
             <X className="h-5 w-5" />
           </button>
