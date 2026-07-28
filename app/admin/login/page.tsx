@@ -1,8 +1,6 @@
 "use client";
 
 import { useState, FormEvent } from "react";
-import { signIn } from "next-auth/react";
-import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 
@@ -11,38 +9,59 @@ export default function AdminLoginPage() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
-  const router = useRouter();
 
-  const handleSubmit = async (e: FormEvent) => {
+  // Show error from URL params (e.g. ?error=CredentialsSignin)
+  const urlError = typeof window !== "undefined"
+    ? new URLSearchParams(window.location.search).get("error")
+    : null;
+
+  // On mount, show errors from redirect params and clean URL
+  if (urlError && typeof window !== "undefined" && !error && !loading) {
+    const msg = urlError === "CredentialsSignin"
+      ? "Invalid email or password"
+      : urlError === "MissingCSRF"
+      ? "Session expired. Please try again."
+      : "Login failed. Please check your credentials.";
+    setError(msg);
+    window.history.replaceState({}, "", "/admin/login");
+  }
+
+  const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setError("");
 
-    try {
-      const result = await signIn("credentials", {
-        email,
-        password,
-        redirect: false,
-      });
+    // Get CSRF token first via fetch (handles cookie too)
+    fetch("/api/auth/csrf")
+      .then((r) => r.json())
+      .then((data) => {
+        const csrfToken = data.csrfToken;
+        // Build and submit a native form with CSRF token
+        const form = document.createElement("form");
+        form.method = "POST";
+        form.action = "/api/auth/callback/credentials";
+        form.style.display = "none";
 
-      if (result?.error) {
-        console.error("[login] signIn error:", result.error);
-        if (result.error === "CredentialsSignin") {
-          setError("Invalid email or password");
-        } else {
-          setError("Login failed: " + result.error);
-        }
-      } else if (result?.ok) {
-        router.push("/admin");
-        router.refresh();
-      } else {
-        setError("Login failed. Please try again.");
-      }
-    } catch (err) {
-      console.error("[login] unexpected error:", err);
-      setError("Something went wrong. Please try again.");
-    }
-    setLoading(false);
+        const addField = (name: string, value: string) => {
+          const i = document.createElement("input");
+          i.type = "hidden";
+          i.name = name;
+          i.value = value;
+          form.appendChild(i);
+        };
+
+        addField("csrfToken", csrfToken);
+        addField("email", email);
+        addField("password", password);
+        addField("callbackUrl", "/admin");
+
+        document.body.appendChild(form);
+        form.submit();
+      })
+      .catch(() => {
+        setError("Could not connect to server. Please try again.");
+        setLoading(false);
+      });
   };
 
   return (
