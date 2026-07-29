@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
-import { categories, products, productImages, productFeatures, paymentOptions } from "@/db/schema";
+import { categories, products, productFeatures, paymentOptions } from "@/db/schema";
 import { eq, sql } from "drizzle-orm";
 
 const SEED_CATEGORIES = [
@@ -14,7 +14,13 @@ const SEED_CATEGORIES = [
   { name: "API & Backend", slug: "api-backend", icon: "⚙️", description: "Backend APIs, serverless functions, database schemas, and integration tools.", sortOrder: 8 },
 ];
 
-const SEED_PRODUCTS = [
+interface SeedProduct {
+  name: string; slug: string; shortDesc: string; desc: string;
+  type: string; cat: string; price: number; discount: number | null;
+  featured?: boolean; best?: boolean; delivery: string;
+}
+
+const SEED_PRODUCTS: SeedProduct[] = [
   { name: "Expense Tracker Pro", slug: "expense-tracker-pro", shortDesc: "Full-featured expense tracking mobile app template — ready to brand and publish.", desc: "A complete React Native mobile app template for tracking daily expenses, managing budgets, and generating spending reports.\n\n• Add/Edit/Delete expenses by category\n• Monthly and yearly spending reports\n• Budget management with alerts\n• Dark mode & light mode\n• Export to CSV", type: "READY_MADE", cat: "mobile-apps", price: 2499, discount: 1499, featured: true, best: true, delivery: "download" },
   { name: "Flutter Business Dashboard", slug: "flutter-business-dashboard", shortDesc: "Flutter-based business dashboard with analytics, charts, and team management.", desc: "A powerful Flutter dashboard template for managing business metrics on the go.\n\n• Real-time analytics & charts\n• Team management module\n• Sales & revenue tracking\n• Customer database\n• Cross-platform (iOS + Android)", type: "READY_MADE", cat: "mobile-apps", price: 3499, discount: 2499, featured: true, best: true, delivery: "download" },
   { name: "Food Delivery App Template", slug: "food-delivery-app", shortDesc: "Complete food delivery app template with user, restaurant, and admin panels.", desc: "A full-stack food delivery app template built with Flutter & Node.js.\n\n• User app with order tracking\n• Restaurant dashboard\n• Admin panel\n• Push notifications\n• Payment integration", type: "READY_MADE", cat: "mobile-apps", price: 4999, discount: 3499, featured: true, delivery: "download" },
@@ -38,85 +44,91 @@ const SEED_PRODUCTS = [
   { name: "Instagram Carousel Templates", slug: "instagram-carousel-templates", shortDesc: "20 editable Instagram carousel templates in Canva format.", desc: "Eye-catching Instagram carousel templates for content creators.\n\n• 20 unique designs\n• Editable in Canva (free)\n• Includes story highlights\n• Brand color customization\n• Ready-to-post format", type: "READY_MADE", cat: "social-media", price: 499, discount: 299, delivery: "download" },
 ];
 
-export async function GET(request: Request) {
-  // Simple auth check via query param (same as setup endpoint)
-  const { searchParams } = new URL(request.url);
-  const key = searchParams.get("key");
-
-  // Check if already seeded
+export async function GET() {
   const existingCats = await db.select({ count: sql<number>`count(*)` }).from(categories).get();
-  if (existingCats && existingCats.count > 0 && key !== "force") {
+  if (existingCats && existingCats.count! > 0) {
     return NextResponse.json({
-      message: "Database already has categories. Use ?key=force to re-seed.",
+      message: "Database already has categories. To re-seed, run the local seed script.",
       categoryCount: existingCats.count,
     });
   }
 
-  const results = { categories: 0, products: 0, skipped: [] as string[] };
+  const results = { categories: 0, products: 0, errors: [] as string[] };
 
-  // 1. Seed Categories
-  for (const cat of SEED_CATEGORIES) {
-    const existing = await db.select().from(categories).where(eq(categories.slug, cat.slug)).get();
-    if (existing) {
-      results.skipped.push(`Category: ${cat.name}`);
-      continue;
-    }
-    await db.insert(categories).values(cat);
-    results.categories++;
-  }
-
-  // 2. Get category ID map
-  const allCats = await db.select().from(categories).all();
-  const catMap: Record<string, number> = {};
-  for (const c of allCats) catMap[c.slug] = c.id;
-
-  // 3. Seed Products
-  for (const p of SEED_PRODUCTS) {
-    const existing = await db.select().from(products).where(eq(products.slug, p.slug)).get();
-    if (existing) {
-      results.skipped.push(`Product: ${p.name}`);
-      continue;
-    }
-    const catId = catMap[p.cat] || null;
-
-    const result = await db.insert(products).values({
-      name: p.name,
-      slug: p.slug,
-      shortDescription: p.shortDesc,
-      description: p.desc,
-      productType: p.type as any,
-      categoryId: catId,
-      price: p.price.toString(),
-      discountPrice: p.discount ? p.discount.toString() : null,
-      advancePercentage: "30",
-      pricingModel: "fixed",
-      status: "published",
-      featured: p.featured ? 1 : 0,
-      bestSeller: p.best ? 1 : 0,
-      deliveryMethod: p.delivery as any,
-    }).returning().get();
-
-    if (p.type === "FREE") {
-      await db.insert(productFeatures).values({
-        productId: result.id,
-        feature: "Free download",
-        sortOrder: 0,
+  try {
+    // 1. Seed Categories
+    for (const cat of SEED_CATEGORIES) {
+      await db.insert(categories).values({
+        name: cat.name,
+        slug: cat.slug,
+        icon: cat.icon,
+        description: cat.description,
+        sortOrder: cat.sortOrder,
+        status: "active",
       });
+      results.categories++;
     }
 
-    // Payment options for non-free products
-    if (p.type !== "FREE") {
-      for (const provider of ["RAZORPAY", "PAYPAL", "WHATSAPP"] as const) {
-        await db.insert(paymentOptions).values({
-          productId: result.id,
-          provider,
-          paymentUrl: "",
-          enabled: 1,
+    // 2. Get category ID map
+    const allCats = await db.select().from(categories).all();
+    const catMap: Record<string, number> = {};
+    for (const c of allCats) catMap[c.slug] = c.id!;
+
+    // 3. Seed Products
+    for (const p of SEED_PRODUCTS) {
+      try {
+        const catId = catMap[p.cat] || null;
+        await db.insert(products).values({
+          name: p.name,
+          slug: p.slug,
+          shortDescription: p.shortDesc,
+          description: p.desc,
+          productType: p.type as any,
+          categoryId: catId,
+          price: p.price,
+          discountPrice: p.discount,
+          advancePercentage: 30,
+          pricingModel: "fixed",
+          status: "published",
+          featured: p.featured ? 1 : 0,
+          bestSeller: p.best ? 1 : 0,
+          deliveryMethod: p.delivery as any,
         });
+
+        // Get the inserted product ID by slug
+        const inserted = await db.select().from(products).where(eq(products.slug, p.slug)).get();
+        const prodId = inserted?.id;
+        if (!prodId) {
+          results.errors.push(`Could not find product after insert: ${p.name}`);
+          continue;
+        }
+
+        if (p.type === "FREE") {
+          await db.insert(productFeatures).values({
+            productId: prodId,
+            feature: "Free download",
+            sortOrder: 0,
+          });
+        }
+
+        if (p.type !== "FREE") {
+          for (const provider of ["RAZORPAY", "PAYPAL", "WHATSAPP"] as const) {
+            await db.insert(paymentOptions).values({
+              productId: prodId,
+              provider,
+              paymentUrl: "",
+              enabled: 1,
+            });
+          }
+        }
+
+        results.products++;
+      } catch (err) {
+        results.errors.push(`Failed to create ${p.name}: ${err}`);
       }
     }
-
-    results.products++;
+  } catch (err) {
+    return NextResponse.json({ error: "Seed failed", detail: String(err) }, { status: 500 });
   }
 
   return NextResponse.json({
