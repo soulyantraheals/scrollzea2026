@@ -1,34 +1,81 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useState, useEffect, useRef, FormEvent } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 
 export default function AdminLoginPage() {
-  const csrfRef = useRef("");
-  const formRef = useRef<HTMLFormElement>(null);
-  const csrfInputRef = useRef<HTMLInputElement>(null);
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const [csrfToken, setCsrfToken] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+  const csrfFetched = useRef(false);
 
-  // Fetch CSRF token on page load (this also sets the CSRF cookie)
+  // Fetch CSRF token on page load
   useEffect(() => {
+    if (csrfFetched.current) return;
+    csrfFetched.current = true;
+
     fetch("/api/auth/csrf")
       .then((r) => r.json())
       .then((data) => {
-        csrfRef.current = data.csrfToken;
-        if (csrfInputRef.current) {
-          csrfInputRef.current.value = data.csrfToken;
-        }
+        setCsrfToken(data.csrfToken);
       })
       .catch(() => {});
   }, []);
 
   // Show error from URL param
   useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-    const err = params.get("error");
+    const err = searchParams.get("error");
     if (err === "CredentialsSignin") {
-      alert("Invalid email or password");
-      window.history.replaceState({}, "", "/admin");
+      setError("Invalid email or password");
+    } else if (err === "MissingCSRF") {
+      setError("Session expired. Please try again.");
     }
-  }, []);
+  }, [searchParams]);
+
+  const handleSubmit = async (e: FormEvent) => {
+    e.preventDefault();
+    if (!csrfToken) {
+      setError("Still loading... please try again.");
+      return;
+    }
+
+    setLoading(true);
+    setError("");
+
+    const form = e.target as HTMLFormElement;
+    const formData = new FormData(form);
+
+    try {
+      const res = await fetch("/api/auth/callback/credentials", {
+        method: "POST",
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        body: new URLSearchParams({
+          csrfToken,
+          callbackUrl: "/admin/dashboard",
+          email: formData.get("email") as string,
+          password: formData.get("password") as string,
+        }),
+      });
+
+      if (res.ok) {
+        router.push("/admin/dashboard");
+        router.refresh();
+      } else {
+        // Check if redirected to login page with error
+        const text = await res.text();
+        if (text.includes("CredentialsSignin") || text.includes("error")) {
+          setError("Invalid email or password");
+        } else {
+          setError("Login failed. Please try again.");
+        }
+      }
+    } catch {
+      setError("Network error. Please try again.");
+    }
+    setLoading(false);
+  };
 
   return (
     <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: "#071B14" }}>
@@ -43,20 +90,18 @@ export default function AdminLoginPage() {
           className="rounded-2xl p-8"
           style={{ backgroundColor: "#0D241D", border: "1px solid rgba(212,175,55,0.15)" }}
         >
-          <form
-            ref={formRef}
-            action="/api/auth/callback/credentials"
-            method="POST"
-            className="space-y-4"
-          >
-            <input ref={csrfInputRef} type="hidden" name="csrfToken" value="" />
-            <input type="hidden" name="callbackUrl" value="/admin/dashboard" />
+          <form onSubmit={handleSubmit} className="space-y-4">
+            {error && (
+              <div className="p-3 rounded-lg text-sm text-center" style={{ backgroundColor: "rgba(239,68,68,0.15)", color: "#EF4444" }}>
+                {error}
+              </div>
+            )}
             <div>
               <label className="block text-sm font-medium mb-1.5" style={{ color: "#B8C2BE" }}>Email</label>
               <input
                 type="email"
                 name="email"
-                placeholder="admin@scrollzea.com"
+                placeholder="srollzea@gmail.com"
                 required
                 className="w-full px-4 py-2.5 rounded-lg text-sm"
                 style={{ backgroundColor: "#071B14", border: "1px solid rgba(212,175,55,0.2)", color: "#FFFFFF" }}
@@ -75,18 +120,19 @@ export default function AdminLoginPage() {
             </div>
             <button
               type="submit"
-              className="w-full py-2.5 rounded-lg text-sm font-semibold hover:opacity-90 transition-all"
+              disabled={loading || !csrfToken}
+              className="w-full py-2.5 rounded-lg text-sm font-semibold hover:opacity-90 transition-all disabled:opacity-50"
               style={{
                 background: "linear-gradient(135deg, #D4AF37, #F4D06F)",
                 color: "#071B14",
               }}
             >
-              Sign In
+              {loading ? "Signing in..." : "Sign In"}
             </button>
           </form>
 
           <div className="mt-6 text-xs text-center" style={{ color: "#6B7B76" }}>
-            Use: admin@scrollzea.com / scrollzeaAdmin2024!
+            Use: srollzea@gmail.com / scrollzeaAdmin2024!
           </div>
         </div>
       </div>
