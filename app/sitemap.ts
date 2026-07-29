@@ -5,7 +5,7 @@ import { eq } from "drizzle-orm";
 import { MetadataRoute } from "next";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const baseUrl = process.env.SITE_URL || "https://scrollzea2026.vercel.app";
+  const baseUrl = process.env.SITE_URL || "https://scrollzea.vercel.app";
 
   const allProducts = await db
     .select({ slug: products.slug, updatedAt: products.updatedAt })
