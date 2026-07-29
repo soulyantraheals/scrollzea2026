@@ -45,46 +45,50 @@ const SEED_PRODUCTS: SeedProduct[] = [
 ];
 
 export async function GET() {
-  const existingCats = await db.select({ count: sql<number>`count(*)` }).from(categories).get();
-  if (existingCats && existingCats.count! > 0) {
-    return NextResponse.json({
-      message: "Database already has categories. To re-seed, run the local seed script.",
-      categoryCount: existingCats.count,
-    });
-  }
-
-  const results = { categories: 0, products: 0, errors: [] as string[] };
+  const result = { categoriesCreated: 0, categoriesSkipped: 0, productsCreated: 0, productsSkipped: 0, errors: [] as string[] };
 
   try {
-    // 1. Seed Categories
+    // ── 1. Categories ──
+    const existingCatSlugs = new Set(
+      (await db.select({ slug: categories.slug }).from(categories).all()).map(r => r.slug)
+    );
+
     for (const cat of SEED_CATEGORIES) {
+      if (existingCatSlugs.has(cat.slug)) {
+        result.categoriesSkipped++;
+        continue;
+      }
       await db.insert(categories).values({
-        name: cat.name,
-        slug: cat.slug,
-        icon: cat.icon,
-        description: cat.description,
-        sortOrder: cat.sortOrder,
-        status: "active",
-      });
-      results.categories++;
+        name: cat.name, slug: cat.slug, icon: cat.icon,
+        description: cat.description, sortOrder: cat.sortOrder, status: "active",
+      } as any);
+      result.categoriesCreated++;
     }
 
-    // 2. Get category ID map
+    // ── 2. Get category ID map ──
     const allCats = await db.select().from(categories).all();
     const catMap: Record<string, number> = {};
     for (const c of allCats) catMap[c.slug] = c.id!;
 
-    // 3. Seed Products
+    // ── 3. Products ──
+    const existingProdSlugs = new Set(
+      (await db.select({ slug: products.slug }).from(products).all()).map(r => r.slug)
+    );
+
     for (const p of SEED_PRODUCTS) {
+      if (existingProdSlugs.has(p.slug)) {
+        result.productsSkipped++;
+        continue;
+      }
+
       try {
-        const catId = catMap[p.cat] || null;
         await db.insert(products).values({
           name: p.name,
           slug: p.slug,
           shortDescription: p.shortDesc,
           description: p.desc,
           productType: p.type,
-          categoryId: catId,
+          categoryId: catMap[p.cat] || null,
           price: p.price,
           discountPrice: p.discount ?? null,
           advancePercentage: 30,
@@ -95,36 +99,21 @@ export async function GET() {
           deliveryMethod: p.delivery,
         } as any);
 
-        // Get the inserted product ID by slug
         const inserted = await db.select().from(products).where(eq(products.slug, p.slug)).get();
         const prodId = inserted?.id;
-        if (!prodId) {
-          results.errors.push(`Could not find product after insert: ${p.name}`);
-          continue;
-        }
+        if (!prodId) { result.errors.push(`Missing product after insert: ${p.name}`); continue; }
 
         if (p.type === "FREE") {
-          await db.insert(productFeatures).values({
-            productId: prodId,
-            feature: "Free download",
-            sortOrder: 0,
-          });
+          await db.insert(productFeatures).values({ productId: prodId, feature: "Free download", sortOrder: 0 } as any);
         }
-
         if (p.type !== "FREE") {
           for (const provider of ["RAZORPAY", "PAYPAL", "WHATSAPP"] as const) {
-            await db.insert(paymentOptions).values({
-              productId: prodId,
-              provider,
-              paymentUrl: "",
-              enabled: 1,
-            });
+            await db.insert(paymentOptions).values({ productId: prodId, provider, paymentUrl: "", enabled: 1 } as any);
           }
         }
-
-        results.products++;
+        result.productsCreated++;
       } catch (err) {
-        results.errors.push(`Failed to create ${p.name}: ${err}`);
+        result.errors.push(`${p.name}: ${err}`);
       }
     }
   } catch (err) {
@@ -133,6 +122,10 @@ export async function GET() {
 
   return NextResponse.json({
     message: "Seed complete!",
-    results,
+    result,
+    totals: {
+      categories: await db.select({ count: sql<number>`count(*)` }).from(categories).get().then(r => r?.count),
+      products: await db.select({ count: sql<number>`count(*)` }).from(products).get().then(r => r?.count),
+    }
   });
 }
