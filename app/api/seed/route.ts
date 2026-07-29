@@ -16,7 +16,7 @@ const SEED_CATEGORIES = [
 
 interface SeedProduct {
   name: string; slug: string; shortDesc: string; desc: string;
-  type: string; cat: string; price: number; discount: number | null;
+  type: string; cat: string; price: number; discount?: number | null;
   featured?: boolean; best?: boolean; delivery: string;
 }
 
@@ -83,17 +83,17 @@ export async function GET() {
           slug: p.slug,
           shortDescription: p.shortDesc,
           description: p.desc,
-          productType: p.type as any,
+          productType: p.type,
           categoryId: catId,
           price: p.price,
-          discountPrice: p.discount,
+          discountPrice: p.discount ?? null,
           advancePercentage: 30,
           pricingModel: "fixed",
           status: "published",
           featured: p.featured ? 1 : 0,
           bestSeller: p.best ? 1 : 0,
-          deliveryMethod: p.delivery as any,
-        });
+          deliveryMethod: p.delivery,
+        } as any);
 
         // Get the inserted product ID by slug
         const inserted = await db.select().from(products).where(eq(products.slug, p.slug)).get();
