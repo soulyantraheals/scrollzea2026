@@ -1,27 +1,13 @@
 "use client";
 
-import { useState, useEffect, useRef, FormEvent } from "react";
+import { useState, useEffect, FormEvent } from "react";
+import { signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
 
 export default function AdminLoginPage() {
   const router = useRouter();
-  const [csrfToken, setCsrfToken] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-  const csrfFetched = useRef(false);
-
-  // Fetch CSRF token on page load
-  useEffect(() => {
-    if (csrfFetched.current) return;
-    csrfFetched.current = true;
-
-    fetch("/api/auth/csrf")
-      .then((r) => r.json())
-      .then((data) => {
-        setCsrfToken(data.csrfToken);
-      })
-      .catch(() => {});
-  }, []);
 
   // Show error from URL param
   useEffect(() => {
@@ -33,47 +19,38 @@ export default function AdminLoginPage() {
     } else if (err === "MissingCSRF") {
       setError("Session expired. Please try again.");
     }
+    // Clean error from URL
+    if (err) {
+      window.history.replaceState({}, "", "/admin");
+    }
   }, []);
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
-    if (!csrfToken) {
-      setError("Still loading... please try again.");
-      return;
-    }
-
     setLoading(true);
     setError("");
 
     const form = e.target as HTMLFormElement;
     const formData = new FormData(form);
+    const email = formData.get("email") as string;
+    const password = formData.get("password") as string;
 
     try {
-      const res = await fetch("/api/auth/callback/credentials", {
-        method: "POST",
-        headers: { "Content-Type": "application/x-www-form-urlencoded" },
-        body: new URLSearchParams({
-          csrfToken,
-          callbackUrl: "/admin/dashboard",
-          email: formData.get("email") as string,
-          password: formData.get("password") as string,
-        }),
+      const result = await signIn("credentials", {
+        email,
+        password,
+        redirect: false,
+        callbackUrl: "/admin/dashboard",
       });
 
-      if (res.ok) {
+      if (result?.ok && !result?.error) {
         router.push("/admin/dashboard");
         router.refresh();
       } else {
-        // Check if redirected to login page with error
-        const text = await res.text();
-        if (text.includes("CredentialsSignin") || text.includes("error")) {
-          setError("Invalid email or password");
-        } else {
-          setError("Login failed. Please try again.");
-        }
+        setError("Invalid email or password");
       }
     } catch {
-      setError("Network error. Please try again.");
+      setError("Connection error. Please check your network and try again.");
     }
     setLoading(false);
   };
@@ -104,6 +81,8 @@ export default function AdminLoginPage() {
                 name="email"
                 placeholder="srollzea@gmail.com"
                 required
+                autoComplete="email"
+                inputMode="email"
                 className="w-full px-4 py-2.5 rounded-lg text-sm"
                 style={{ backgroundColor: "#071B14", border: "1px solid rgba(212,175,55,0.2)", color: "#FFFFFF" }}
               />
@@ -115,13 +94,14 @@ export default function AdminLoginPage() {
                 name="password"
                 placeholder="Enter password"
                 required
+                autoComplete="current-password"
                 className="w-full px-4 py-2.5 rounded-lg text-sm"
                 style={{ backgroundColor: "#071B14", border: "1px solid rgba(212,175,55,0.2)", color: "#FFFFFF" }}
               />
             </div>
             <button
               type="submit"
-              disabled={loading || !csrfToken}
+              disabled={loading}
               className="w-full py-2.5 rounded-lg text-sm font-semibold hover:opacity-90 transition-all disabled:opacity-50"
               style={{
                 background: "linear-gradient(135deg, #D4AF37, #F4D06F)",
