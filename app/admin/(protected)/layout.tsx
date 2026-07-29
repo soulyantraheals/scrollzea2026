@@ -41,7 +41,7 @@ function ProtectedLayoutContent({ children }: { children: React.ReactNode }) {
   // Show nothing while checking auth
   if (!authChecked) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+      <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: "var(--bg-primary)" }}>
         <LoadingSpinner />
       </div>
     );
@@ -53,7 +53,7 @@ function ProtectedLayoutContent({ children }: { children: React.ReactNode }) {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen" style={{ backgroundColor: "var(--bg-primary)" }}>
       <Sidebar open={sidebarOpen} onClose={() => setSidebarOpen(false)} />
       <div className="lg:pl-64 transition-all duration-200">
         <AdminHeader onMenuClick={() => setSidebarOpen(true)} />

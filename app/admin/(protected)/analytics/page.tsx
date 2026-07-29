@@ -5,7 +5,7 @@ import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { StatCard } from "@/components/admin/StatCard";
 import { formatPrice } from "@/lib/utils";
-import { BarChart3, MousePointerClick, ShoppingCart, TrendingUp, TrendingDown } from "lucide-react";
+import { BarChart3, MousePointerClick, ShoppingCart, TrendingUp } from "lucide-react";
 
 export default function AnalyticsPage() {
   const [data, setData] = useState<any>(null);
@@ -21,11 +21,18 @@ export default function AnalyticsPage() {
   if (loading) return <LoadingSpinner />;
   if (!data) return <EmptyState title="No analytics data yet" description="Data will appear once customers interact with your products." />;
 
+  const sectionCardStyle = {
+    backgroundColor: "var(--bg-card)",
+    border: "1px solid var(--border-gold)",
+    borderRadius: "12px",
+    padding: "24px",
+  };
+
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold">Analytics</h1>
-        <p className="text-gray-500 mt-1">Track clicks, sales, and product performance.</p>
+        <h1 className="text-2xl font-bold" style={{ color: "var(--text-primary)" }}>Analytics</h1>
+        <p className="mt-1" style={{ color: "var(--text-muted)" }}>Track clicks, sales, and product performance.</p>
       </div>
 
       {/* Overview Stats */}
@@ -38,19 +45,25 @@ export default function AnalyticsPage() {
 
       {/* Top Products */}
       {data.topProducts?.length > 0 && (
-        <div className="bg-white rounded-xl border border-gray-100 p-6">
-          <h2 className="text-lg font-semibold mb-4">🔥 Top Products by Clicks</h2>
+        <div style={sectionCardStyle}>
+          <h2 className="text-lg font-semibold mb-4" style={{ color: "var(--text-primary)" }}>🔥 Top Products by Clicks</h2>
           <div className="space-y-3">
             {data.topProducts.map((p: any, i: number) => (
               <div key={p.id} className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
-                  <span className="text-sm font-bold text-gray-400 w-6">#{i + 1}</span>
-                  <p className="text-sm font-medium text-gray-900">{p.name}</p>
+                  <span className="text-sm font-bold w-6" style={{ color: "var(--text-dim)" }}>#{i + 1}</span>
+                  <p className="text-sm font-medium" style={{ color: "var(--text-primary)" }}>{p.name}</p>
                 </div>
                 <div className="flex items-center gap-4">
-                  <span className="text-sm text-gray-500">{p.clickCount} clicks</span>
-                  <div className="w-32 bg-gray-100 rounded-full h-2">
-                    <div className="bg-indigo-500 h-2 rounded-full" style={{ width: `${Math.min(100, (p.clickCount / data.topProducts[0].clickCount) * 100)}%` }} />
+                  <span className="text-sm" style={{ color: "var(--text-muted)" }}>{p.clickCount} clicks</span>
+                  <div className="w-32 rounded-full h-2" style={{ backgroundColor: "var(--bg-secondary)" }}>
+                    <div
+                      className="h-2 rounded-full"
+                      style={{
+                        width: `${Math.min(100, (p.clickCount / data.topProducts[0].clickCount) * 100)}%`,
+                        backgroundColor: "var(--accent-gold)",
+                      }}
+                    />
                   </div>
                 </div>
               </div>
@@ -61,14 +74,20 @@ export default function AnalyticsPage() {
 
       {/* Bottom Products */}
       {data.bottomProducts?.length > 0 && (
-        <div className="bg-white rounded-xl border border-gray-100 p-6">
-          <h2 className="text-lg font-semibold mb-4">⚠️ Products Needing Attention</h2>
-          <p className="text-sm text-gray-500 mb-4">These products have low or no engagement.</p>
+        <div style={sectionCardStyle}>
+          <h2 className="text-lg font-semibold mb-4" style={{ color: "var(--text-primary)" }}>⚠️ Products Needing Attention</h2>
+          <p className="text-sm mb-4" style={{ color: "var(--text-muted)" }}>These products have low or no engagement.</p>
           <div className="space-y-2">
             {data.bottomProducts.map((p: any) => (
-              <div key={p.id} className="flex items-center justify-between p-3 bg-red-50 rounded-lg">
-                <p className="text-sm font-medium text-gray-900">{p.name}</p>
-                <span className="text-xs text-red-600 font-medium">{p.clickCount} clicks · {p.saleCount} sales</span>
+              <div
+                key={p.id}
+                className="flex items-center justify-between p-3 rounded-lg"
+                style={{ backgroundColor: "rgba(239, 68, 68, 0.08)" }}
+              >
+                <p className="text-sm font-medium" style={{ color: "var(--text-primary)" }}>{p.name}</p>
+                <span className="text-xs font-medium" style={{ color: "#EF4444" }}>
+                  {p.clickCount} clicks · {p.saleCount} sales
+                </span>
               </div>
             ))}
           </div>
@@ -79,9 +98,9 @@ export default function AnalyticsPage() {
       {data.clicksByMethod?.length > 0 && (
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           {data.clicksByMethod.map((m: any) => (
-            <div key={m.method} className="bg-white rounded-xl border border-gray-100 p-6 text-center">
-              <p className="text-2xl font-bold text-gray-900">{m.count}</p>
-              <p className="text-sm text-gray-500 mt-1 capitalize">{m.method.replace("_", " ")} Clicks</p>
+            <div key={m.method} style={sectionCardStyle} className="text-center">
+              <p className="text-2xl font-bold" style={{ color: "var(--accent-gold)" }}>{m.count}</p>
+              <p className="text-sm mt-1 capitalize" style={{ color: "var(--text-muted)" }}>{m.method.replace("_", " ")} Clicks</p>
             </div>
           ))}
         </div>

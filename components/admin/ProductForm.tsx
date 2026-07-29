@@ -13,6 +13,25 @@ interface ProductFormProps {
   categories: Array<{ id: number; name: string }>;
 }
 
+const sectionStyle = {
+  backgroundColor: "var(--bg-card)",
+  border: "1px solid var(--border-gold)",
+  borderRadius: "12px",
+  padding: "24px",
+};
+
+const fieldLabelStyle = { color: "var(--text-muted)", fontSize: "0.875rem", fontWeight: 500, marginBottom: "6px" };
+const inputBaseStyle = {
+  backgroundColor: "var(--bg-primary)",
+  border: "1px solid var(--border-gold)",
+  color: "var(--text-primary)",
+  borderRadius: "8px",
+  padding: "10px 16px",
+  width: "100%",
+  fontSize: "0.875rem",
+  outline: "none",
+};
+
 export function ProductForm({ product, categories }: ProductFormProps) {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
@@ -121,123 +140,69 @@ export function ProductForm({ product, categories }: ProductFormProps) {
   const advancePct = parseFloat(form.advancePercentage) || 30;
   const advanceAmount = (displayPrice * advancePct) / 100;
 
+  const renderSelect = (label: string, value: string, onChange: (v: string) => void, options: { value: string; label: string }[]) => (
+    <div>
+      <label style={fieldLabelStyle}>{label}</label>
+      <select value={value} onChange={(e) => onChange(e.target.value)} style={inputBaseStyle}>
+        {options.map((o) => (
+          <option key={o.value} value={o.value}>{o.label}</option>
+        ))}
+      </select>
+    </div>
+  );
+
+  const renderTextarea = (label: string, value: string, onChange: (v: string) => void, rows: number) => (
+    <div>
+      <label style={fieldLabelStyle}>{label}</label>
+      <textarea value={value} onChange={(e) => onChange(e.target.value)} rows={rows} style={{ ...inputBaseStyle, resize: "vertical" }} />
+    </div>
+  );
+
   return (
     <form onSubmit={handleSubmit} className="space-y-8">
       {/* Basic Information */}
-      <section className="bg-white rounded-xl border border-gray-100 p-6">
-        <h2 className="text-lg font-semibold mb-4">Basic Information</h2>
+      <section style={sectionStyle}>
+        <h2 className="text-lg font-semibold mb-4" style={{ color: "var(--text-primary)" }}>Basic Information</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <Input
-            label="Product Name"
-            value={form.name}
-            onChange={(e) => updateField("name", e.target.value)}
-            required
-          />
-          <Input
-            label="Slug"
-            value={form.slug}
-            onChange={(e) => updateField("slug", e.target.value)}
-            required
-          />
+          <Input label="Product Name" value={form.name} onChange={(e) => updateField("name", e.target.value)} required />
+          <Input label="Slug" value={form.slug} onChange={(e) => updateField("slug", e.target.value)} required />
         </div>
         <div className="mt-4">
-          <label className="block text-sm font-medium text-gray-700 mb-1.5">
-            Short Description
-          </label>
-          <textarea
-            value={form.shortDescription}
-            onChange={(e) => updateField("shortDescription", e.target.value)}
-            rows={2}
-            className="w-full px-4 py-2.5 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-          />
+          {renderTextarea("Short Description", form.shortDescription, (v) => updateField("shortDescription", v), 2)}
         </div>
         <div className="mt-4">
-          <label className="block text-sm font-medium text-gray-700 mb-1.5">
-            Full Description
-          </label>
-          <textarea
-            value={form.description}
-            onChange={(e) => updateField("description", e.target.value)}
-            rows={5}
-            className="w-full px-4 py-2.5 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-          />
+          {renderTextarea("Full Description", form.description, (v) => updateField("description", v), 5)}
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1.5">
-              Category
-            </label>
-            <select
-              value={form.categoryId}
-              onChange={(e) => updateField("categoryId", e.target.value)}
-              className="w-full px-4 py-2.5 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-            >
-              <option value="">Select category</option>
-              {categories.map((cat) => (
-                <option key={cat.id} value={cat.id}>
-                  {cat.name}
-                </option>
-              ))}
-            </select>
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1.5">
-              Product Type
-            </label>
-            <select
-              value={form.productType}
-              onChange={(e) => updateField("productType", e.target.value)}
-              className="w-full px-4 py-2.5 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-            >
-              <option value="READY_MADE">Ready-made (Buy Now)</option>
-              <option value="FREE">Free (₹0)</option>
-              <option value="PREBOOK">Pre-book (Custom Service, 30% Advance)</option>
-              <option value="CUSTOM_QUOTE">Custom Quote (Request Quote)</option>
-            </select>
-          </div>
+          {renderSelect("Category", form.categoryId, (v) => updateField("categoryId", v), [
+            { value: "", label: "Select category" },
+            ...categories.map((cat) => ({ value: cat.id.toString(), label: cat.name })),
+          ])}
+          {renderSelect("Product Type", form.productType, (v) => updateField("productType", v), [
+            { value: "READY_MADE", label: "Ready-made (Buy Now)" },
+            { value: "FREE", label: "Free (₹0)" },
+            { value: "PREBOOK", label: "Pre-book (Custom Service, 30% Advance)" },
+            { value: "CUSTOM_QUOTE", label: "Custom Quote (Request Quote)" },
+          ])}
         </div>
       </section>
 
       {/* Pricing */}
-      <section className="bg-white rounded-xl border border-gray-100 p-6">
-        <h2 className="text-lg font-semibold mb-4">Pricing</h2>
+      <section style={sectionStyle}>
+        <h2 className="text-lg font-semibold mb-4" style={{ color: "var(--text-primary)" }}>Pricing</h2>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <Input
-            label="Price (₹)"
-            type="number"
-            value={form.price}
-            onChange={(e) => updateField("price", e.target.value)}
-          />
-          <Input
-            label="Discount Price (₹)"
-            type="number"
-            value={form.discountPrice}
-            onChange={(e) => updateField("discountPrice", e.target.value)}
-          />
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1.5">
-              Pricing Model
-            </label>
-            <select
-              value={form.pricingModel}
-              onChange={(e) => updateField("pricingModel", e.target.value)}
-              className="w-full px-4 py-2.5 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-            >
-              <option value="fixed">Fixed Price</option>
-              <option value="starting_at">Starting From</option>
-              <option value="custom_quote">Custom Quote</option>
-            </select>
-          </div>
+          <Input label="Price (₹)" type="number" value={form.price} onChange={(e) => updateField("price", e.target.value)} />
+          <Input label="Discount Price (₹)" type="number" value={form.discountPrice} onChange={(e) => updateField("discountPrice", e.target.value)} />
+          {renderSelect("Pricing Model", form.pricingModel, (v) => updateField("pricingModel", v), [
+            { value: "fixed", label: "Fixed Price" },
+            { value: "starting_at", label: "Starting From" },
+            { value: "custom_quote", label: "Custom Quote" },
+          ])}
         </div>
         {form.productType === "PREBOOK" && (
-          <div className="mt-4 p-4 bg-indigo-50 rounded-lg">
-            <Input
-              label="Advance Percentage (%)"
-              type="number"
-              value={form.advancePercentage}
-              onChange={(e) => updateField("advancePercentage", e.target.value)}
-            />
-            <div className="mt-2 text-sm text-indigo-700 space-y-1">
+          <div className="mt-4 p-4 rounded-lg" style={{ backgroundColor: "rgba(99, 102, 241, 0.1)" }}>
+            <Input label="Advance Percentage (%)" type="number" value={form.advancePercentage} onChange={(e) => updateField("advancePercentage", e.target.value)} />
+            <div className="mt-2 text-sm space-y-1" style={{ color: "#818CF8" }}>
               <p>Total Price: <strong>₹{displayPrice.toLocaleString("en-IN")}</strong></p>
               <p>Advance ({advancePct}%): <strong>₹{advanceAmount.toLocaleString("en-IN")}</strong></p>
               <p>Remaining: <strong>₹{(displayPrice - advanceAmount).toLocaleString("en-IN")}</strong></p>
@@ -247,79 +212,74 @@ export function ProductForm({ product, categories }: ProductFormProps) {
       </section>
 
       {/* Images */}
-      <section className="bg-white rounded-xl border border-gray-100 p-6">
-        <h2 className="text-lg font-semibold mb-4">Images</h2>
+      <section style={sectionStyle}>
+        <h2 className="text-lg font-semibold mb-4" style={{ color: "var(--text-primary)" }}>Images</h2>
         <div className="mb-3">
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            Or paste image URLs directly (one per line)
-          </label>
-          <input
-            type="text"
-            placeholder="https://example.com/image.jpg"
-            className="w-full px-4 py-2 rounded-lg border border-gray-200"
-            onKeyDown={(e) => {
-              if (e.key === "Enter") {
-                e.preventDefault();
-                const input = e.target as HTMLInputElement;
-                if (input.value) {
-                  setImages([...images, { url: input.value, isPrimary: images.length === 0 }]);
-                  input.value = "";
+          <label style={fieldLabelStyle}>Or paste image URLs directly (one per line)</label>
+          <div style={{ display: "flex", gap: "8px", marginTop: "6px" }}>
+            <input
+              type="text"
+              placeholder="https://example.com/image.jpg"
+              style={{ ...inputBaseStyle, flex: 1 }}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  e.preventDefault();
+                  const input = e.target as HTMLInputElement;
+                  if (input.value) {
+                    setImages([...images, { url: input.value, isPrimary: images.length === 0 }]);
+                    input.value = "";
+                  }
                 }
+              }}
+            />
+            <Button type="button" variant="outline" onClick={() => {
+              const input = document.querySelector<HTMLInputElement>("input[placeholder='https://example.com/image.jpg']");
+              if (input?.value) {
+                setImages([...images, { url: input.value, isPrimary: images.length === 0 }]);
+                input.value = "";
               }
-            }}
-          />
+            }}>Add</Button>
+          </div>
         </div>
         <ImageUploader images={images} onImagesChange={setImages} />
       </section>
 
       {/* Payment Options */}
-      <section className="bg-white rounded-xl border border-gray-100 p-6">
-        <h2 className="text-lg font-semibold mb-4">Payment Options</h2>
+      <section style={sectionStyle}>
+        <h2 className="text-lg font-semibold mb-4" style={{ color: "var(--text-primary)" }}>Payment Options</h2>
         <PaymentOptionsEditor options={paymentOptions} onChange={setPaymentOptions} />
       </section>
 
       {/* Visibility */}
-      <section className="bg-white rounded-xl border border-gray-100 p-6">
-        <h2 className="text-lg font-semibold mb-4">Visibility & Status</h2>
+      <section style={sectionStyle}>
+        <h2 className="text-lg font-semibold mb-4" style={{ color: "var(--text-primary)" }}>Visibility & Status</h2>
         <div className="space-y-3">
-          <label className="flex items-center gap-3 cursor-pointer">
-            <input
-              type="checkbox"
-              checked={form.status === "published"}
-              onChange={(e) =>
-                updateField("status", e.target.checked ? "published" : "draft")
-              }
-              className="rounded border-gray-300 w-4 h-4"
-            />
-            <span className="text-sm font-medium">Published (visible on website)</span>
-          </label>
-          <label className="flex items-center gap-3 cursor-pointer">
-            <input
-              type="checkbox"
-              checked={form.featured}
-              onChange={(e) => updateField("featured", e.target.checked)}
-              className="rounded border-gray-300 w-4 h-4"
-            />
-            <span className="text-sm font-medium">Featured (show on homepage)</span>
-          </label>
-          <label className="flex items-center gap-3 cursor-pointer">
-            <input
-              type="checkbox"
-              checked={form.bestSeller}
-              onChange={(e) => updateField("bestSeller", e.target.checked)}
-              className="rounded border-gray-300 w-4 h-4"
-            />
-            <span className="text-sm font-medium">Best Seller</span>
-          </label>
+          {[
+            { field: "status", label: "Published (visible on website)", checkValue: form.status === "published", onChange: (checked: boolean) => updateField("status", checked ? "published" : "draft") },
+            { field: "featured", label: "Featured (show on homepage)", checkValue: form.featured, onChange: (checked: boolean) => updateField("featured", checked) },
+            { field: "bestSeller", label: "Best Seller", checkValue: form.bestSeller, onChange: (checked: boolean) => updateField("bestSeller", checked) },
+          ].map((item) => (
+            <label key={item.field} className="flex items-center gap-3 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={item.checkValue}
+                onChange={(e) => item.onChange(e.target.checked)}
+                className="rounded w-4 h-4"
+                style={{ accentColor: "var(--accent-gold)" }}
+              />
+              <span className="text-sm font-medium" style={{ color: "var(--text-primary)" }}>{item.label}</span>
+            </label>
+          ))}
           {form.productType === "FREE" && (
             <label className="flex items-center gap-3 cursor-pointer">
               <input
                 type="checkbox"
                 checked={form.leadCaptureRequired}
                 onChange={(e) => updateField("leadCaptureRequired", e.target.checked)}
-                className="rounded border-gray-300 w-4 h-4"
+                className="rounded w-4 h-4"
+                style={{ accentColor: "var(--accent-gold)" }}
               />
-              <span className="text-sm font-medium">
+              <span className="text-sm font-medium" style={{ color: "var(--text-primary)" }}>
                 Collect lead info (name, email, phone) before download
               </span>
             </label>
@@ -328,52 +288,25 @@ export function ProductForm({ product, categories }: ProductFormProps) {
       </section>
 
       {/* Delivery */}
-      <section className="bg-white rounded-xl border border-gray-100 p-6">
-        <h2 className="text-lg font-semibold mb-4">Delivery</h2>
+      <section style={sectionStyle}>
+        <h2 className="text-lg font-semibold mb-4" style={{ color: "var(--text-primary)" }}>Delivery</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1.5">
-              Delivery Method
-            </label>
-            <select
-              value={form.deliveryMethod}
-              onChange={(e) => updateField("deliveryMethod", e.target.value)}
-              className="w-full px-4 py-2.5 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-            >
-              <option value="manual">Manual Delivery</option>
-              <option value="download">Digital Download</option>
-              <option value="external_link">External Link</option>
-              <option value="contact">Contact Required</option>
-            </select>
-          </div>
-          <Input
-            label="Download URL (if applicable)"
-            value={form.downloadUrl}
-            onChange={(e) => updateField("downloadUrl", e.target.value)}
-          />
+          {renderSelect("Delivery Method", form.deliveryMethod, (v) => updateField("deliveryMethod", v), [
+            { value: "manual", label: "Manual Delivery" },
+            { value: "download", label: "Digital Download" },
+            { value: "external_link", label: "External Link" },
+            { value: "contact", label: "Contact Required" },
+          ])}
+          <Input label="Download URL (if applicable)" value={form.downloadUrl} onChange={(e) => updateField("downloadUrl", e.target.value)} />
         </div>
       </section>
 
       {/* SEO */}
-      <section className="bg-white rounded-xl border border-gray-100 p-6">
-        <h2 className="text-lg font-semibold mb-4">SEO</h2>
+      <section style={sectionStyle}>
+        <h2 className="text-lg font-semibold mb-4" style={{ color: "var(--text-primary)" }}>SEO</h2>
         <div className="space-y-4">
-          <Input
-            label="SEO Title"
-            value={form.seoTitle}
-            onChange={(e) => updateField("seoTitle", e.target.value)}
-          />
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1.5">
-              SEO Description
-            </label>
-            <textarea
-              value={form.seoDescription}
-              onChange={(e) => updateField("seoDescription", e.target.value)}
-              rows={2}
-              className="w-full px-4 py-2.5 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-            />
-          </div>
+          <Input label="SEO Title" value={form.seoTitle} onChange={(e) => updateField("seoTitle", e.target.value)} />
+          {renderTextarea("SEO Description", form.seoDescription, (v) => updateField("seoDescription", v), 2)}
         </div>
       </section>
 

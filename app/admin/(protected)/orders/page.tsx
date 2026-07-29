@@ -18,44 +18,74 @@ export default function OrdersPage() {
 
   if (loading) return <LoadingSpinner />;
 
+  const tdStyle = { padding: "12px 16px", color: "var(--text-primary)" };
+  const thStyle = { padding: "12px 16px", textAlign: "left" as const, fontWeight: 500, color: "var(--text-muted)" };
+
   return (
     <div>
-      <h1 className="text-2xl font-bold mb-6">Orders</h1>
+      <h1 className="text-2xl font-bold mb-6" style={{ color: "var(--text-primary)" }}>Orders</h1>
       {orders.length === 0 ? (
         <EmptyState title="No orders yet" description="Orders from customer purchases will appear here." />
       ) : (
-        <div className="bg-white rounded-xl border border-gray-100 overflow-hidden">
+        <div
+          className="overflow-hidden rounded-xl"
+          style={{ backgroundColor: "var(--bg-card)", border: "1px solid var(--border-gold)" }}
+        >
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
-              <thead className="border-b bg-gray-50">
-                <tr>
-                  <th className="text-left px-4 py-3 font-medium text-gray-600">Order</th>
-                  <th className="text-left px-4 py-3 font-medium text-gray-600">Customer</th>
-                  <th className="text-left px-4 py-3 font-medium text-gray-600">Product</th>
-                  <th className="text-right px-4 py-3 font-medium text-gray-600">Amount</th>
-                  <th className="text-left px-4 py-3 font-medium text-gray-600">Payment</th>
-                  <th className="text-left px-4 py-3 font-medium text-gray-600">Status</th>
-                  <th className="text-left px-4 py-3 font-medium text-gray-600">Date</th>
+              <thead style={{ backgroundColor: "var(--bg-secondary)" }}>
+                <tr style={{ borderBottom: "1px solid var(--border-gold)" }}>
+                  <th style={thStyle}>Order</th>
+                  <th style={thStyle}>Customer</th>
+                  <th style={thStyle}>Product</th>
+                  <th style={{ ...thStyle, textAlign: "right" }}>Amount</th>
+                  <th style={thStyle}>Payment</th>
+                  <th style={thStyle}>Status</th>
+                  <th style={thStyle}>Date</th>
                 </tr>
               </thead>
-              <tbody className="divide-y">
+              <tbody>
                 {orders.map((o: any) => (
-                  <tr key={o.id} className="hover:bg-gray-50">
-                    <td className="px-4 py-3 font-mono text-xs">{o.orderNumber}</td>
-                    <td className="px-4 py-3">{o.customerName}</td>
-                    <td className="px-4 py-3 text-gray-600">{o.productName}</td>
-                    <td className="px-4 py-3 text-right font-medium">{formatPrice(o.totalAmount)}</td>
-                    <td className="px-4 py-3">
-                      <span className={`text-xs px-2 py-1 rounded-full ${o.paymentStatus === "paid" ? "bg-emerald-100 text-emerald-700" : o.paymentStatus === "pending" ? "bg-yellow-100 text-yellow-700" : "bg-red-100 text-red-700"}`}>
+                  <tr key={o.id} style={{ borderBottom: "1px solid var(--border-gold)" }}>
+                    <td style={{ ...tdStyle, fontFamily: "monospace", fontSize: "0.75rem" }}>{o.orderNumber}</td>
+                    <td style={tdStyle}>{o.customerName}</td>
+                    <td style={{ ...tdStyle, color: "var(--text-muted)" }}>{o.productName}</td>
+                    <td style={{ ...tdStyle, textAlign: "right", fontWeight: 500 }}>{formatPrice(o.totalAmount)}</td>
+                    <td style={tdStyle}>
+                      <span
+                        className="text-xs px-2 py-1 rounded-full"
+                        style={{
+                          backgroundColor:
+                            o.paymentStatus === "paid" ? "rgba(34, 197, 94, 0.1)" :
+                            o.paymentStatus === "pending" ? "rgba(212, 175, 55, 0.1)" :
+                            "rgba(239, 68, 68, 0.1)",
+                          color:
+                            o.paymentStatus === "paid" ? "#22C55E" :
+                            o.paymentStatus === "pending" ? "#D4AF37" :
+                            "#EF4444",
+                        }}
+                      >
                         {o.paymentStatus}
                       </span>
                     </td>
-                    <td className="px-4 py-3">
-                      <span className={`text-xs px-2 py-1 rounded-full ${o.orderStatus === "completed" ? "bg-emerald-100 text-emerald-700" : o.orderStatus === "processing" ? "bg-blue-100 text-blue-700" : "bg-gray-100 text-gray-600"}`}>
+                    <td style={tdStyle}>
+                      <span
+                        className="text-xs px-2 py-1 rounded-full"
+                        style={{
+                          backgroundColor:
+                            o.orderStatus === "completed" ? "rgba(34, 197, 94, 0.1)" :
+                            o.orderStatus === "processing" ? "rgba(59, 130, 246, 0.1)" :
+                            "rgba(107, 123, 118, 0.1)",
+                          color:
+                            o.orderStatus === "completed" ? "#22C55E" :
+                            o.orderStatus === "processing" ? "#3B82F6" :
+                            "var(--text-dim)",
+                        }}
+                      >
                         {o.orderStatus}
                       </span>
                     </td>
-                    <td className="px-4 py-3 text-xs text-gray-500">{formatDate(o.createdAt)}</td>
+                    <td style={{ ...tdStyle, fontSize: "0.75rem", color: "var(--text-dim)" }}>{formatDate(o.createdAt)}</td>
                   </tr>
                 ))}
               </tbody>

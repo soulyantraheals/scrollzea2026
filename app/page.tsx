@@ -54,35 +54,43 @@ export default async function HomePage() {
     <div>
       {/* ───────────── HERO ───────────── */}
       <section className="relative min-h-screen flex items-center hero-gradient overflow-hidden pt-20">
-        <div className="absolute top-1/4 left-1/4 w-[500px] h-[500px] rounded-full bg-[var(--accent-gold)] opacity-[0.03] blur-[120px]" />
-        <div className="absolute bottom-1/4 right-1/4 w-[400px] h-[400px] rounded-full bg-[var(--accent-gold)] opacity-[0.02] blur-[100px]" />
+        <div className="absolute inset-0 overflow-hidden pointer-events-none">
+          <div className="absolute top-1/4 left-1/4 w-[600px] h-[600px] rounded-full bg-[var(--accent-gold)] opacity-[0.03] blur-[140px]" />
+          <div className="absolute bottom-1/4 right-1/4 w-[500px] h-[500px] rounded-full bg-[var(--accent-gold)] opacity-[0.02] blur-[120px]" />
+          <div className="absolute top-1/2 right-1/3 w-[300px] h-[300px] rounded-full bg-[var(--accent-gold)] opacity-[0.015] blur-[80px]" />
+        </div>
 
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 lg:py-32 w-full">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 lg:py-32 w-full relative z-10">
           <div className="max-w-3xl">
+            {/* Welcome text */}
+            <p className="text-sm sm:text-base font-medium text-[var(--accent-gold)] mb-3 tracking-wide">
+              Welcome to Scrollzea
+            </p>
+
             <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-[var(--border-gold)] text-[var(--accent-gold)] text-xs font-medium tracking-wider uppercase mb-6">
               <span className="w-1.5 h-1.5 rounded-full bg-[var(--accent-gold)]" />
-              Premium Digital Products Marketplace
+              Digital Products Marketplace
             </div>
 
-            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold leading-[1.1] tracking-tight">
+            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold leading-[1.05] tracking-tight">
               Ready-to-Use Digital Products for{" "}
               <span className="gold-gradient">Business, Creators & Developers</span>
             </h1>
 
-            <p className="mt-6 text-lg sm:text-xl text-[var(--text-muted)] leading-relaxed max-w-2xl">
+            <p className="mt-6 text-base sm:text-lg lg:text-xl text-[var(--text-muted)] leading-relaxed max-w-2xl">
               Buy professional website templates, management systems, Flutter apps, automation tools, and custom digital solutions that save weeks of work.
             </p>
 
-            <div className="flex flex-wrap gap-4 mt-10">
-              <a
-                href="#products"
+            <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 mt-10">
+              <Link
+                href="/products"
                 className="btn-gold inline-flex items-center justify-center gap-2 px-8 py-3.5 rounded-xl text-base font-semibold"
               >
                 Explore Products
-                <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <svg className="h-4 w-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M19 14l-7 7m0 0l-7-7m7 7V3" />
                 </svg>
-              </a>
+              </Link>
               <a
                 href="https://wa.me/911234567890?text=Hi%20Scrollzea%2C%20I%20want%20a%20custom%20digital%20solution%20for%20my%20business."
                 target="_blank"
@@ -90,37 +98,37 @@ export default async function HomePage() {
                 className="btn-ghost-gold inline-flex items-center justify-center gap-2 px-8 py-3.5 rounded-xl text-base font-medium"
               >
                 Build Something Custom
-                <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <svg className="h-4 w-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3" />
                 </svg>
               </a>
             </div>
 
-            <div className="mt-16 flex flex-wrap items-center gap-8 text-sm text-[var(--text-dim)]">
-              <div className="flex items-center gap-2">
-                <span className="text-[var(--accent-gold)]">✓</span>
-                Instant Download
-              </div>
-              <div className="flex items-center gap-2">
-                <span className="text-[var(--accent-gold)]">✓</span>
-                Secure Payment
-              </div>
-              <div className="flex items-center gap-2">
-                <span className="text-[var(--accent-gold)]">✓</span>
-                Premium Quality
-              </div>
-              <div className="flex items-center gap-2">
-                <span className="text-[var(--accent-gold)]">✓</span>
-                WhatsApp Support
-              </div>
+            <div className="mt-16 flex flex-wrap items-center gap-6 sm:gap-8 text-sm text-[var(--text-dim)]">
+              {[
+                "Instant Download",
+                "Secure Payment",
+                "Premium Quality",
+                "WhatsApp Support",
+              ].map((item) => (
+                <div key={item} className="flex items-center gap-2">
+                  <span className="w-5 h-5 rounded-full bg-[var(--accent-glow)] flex items-center justify-center">
+                    <span className="text-[var(--accent-gold)] text-xs">✓</span>
+                  </span>
+                  {item}
+                </div>
+              ))}
             </div>
           </div>
         </div>
       </section>
 
       {/* ───────────── FEATURED PRODUCTS ───────────── */}
-      <section id="products" className="section-dark-2 py-20 lg:py-28">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <section id="products" className="section-dark-2 py-20 lg:py-28 relative overflow-hidden">
+        <div className="absolute inset-0 pointer-events-none">
+          <div className="absolute top-0 right-0 w-[400px] h-[400px] rounded-full bg-[var(--accent-gold)] opacity-[0.015] blur-[100px]" />
+        </div>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
           <div className="text-center max-w-2xl mx-auto mb-16">
             <span className="section-label">What We Offer</span>
             <h2 className="text-3xl lg:text-4xl font-bold mt-6 mb-4">
@@ -140,7 +148,7 @@ export default async function HomePage() {
                   className="product-card group animate-fade-in-up"
                   style={{ animationDelay: `${(i % 4) * 100}ms` }}
                 >
-                  <div className="aspect-[4/3] bg-[var(--bg-secondary)] overflow-hidden">
+                  <div className="aspect-[4/3] bg-[var(--bg-secondary)] overflow-hidden rounded-t-[16px]">
                     {product.images?.[0] ? (
                       <img src={product.images[0].imageUrl} alt={product.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
                     ) : (
@@ -152,6 +160,15 @@ export default async function HomePage() {
                     )}
                   </div>
                   <div className="p-5">
+                    <div className="flex items-center gap-2 mb-2">
+                      {product.productType !== "PAID" && (
+                        <span className={`text-[10px] font-semibold uppercase tracking-wider px-2 py-0.5 rounded-full ${
+                          product.productType === "FREE" ? "bg-emerald-500/10 text-emerald-400" : "bg-blue-500/10 text-blue-400"
+                        }`}>
+                          {product.productType}
+                        </span>
+                      )}
+                    </div>
                     <h3 className="font-semibold text-base text-[var(--text-primary)] line-clamp-1">{product.name}</h3>
                     <p className="text-sm text-[var(--text-muted)] mt-1.5 line-clamp-2 leading-relaxed">
                       {product.shortDescription}
@@ -168,7 +185,9 @@ export default async function HomePage() {
             </div>
           ) : (
             <div className="text-center py-16">
-              <p className="text-[var(--text-muted)]">Products coming soon.</p>
+              <div className="w-16 h-16 mx-auto rounded-full bg-[var(--accent-glow)] flex items-center justify-center text-2xl mb-4">📦</div>
+              <p className="text-[var(--text-muted)] font-medium">Products coming soon.</p>
+              <p className="text-sm text-[var(--text-dim)] mt-1">We're curating something special for you.</p>
             </div>
           )}
 
@@ -188,8 +207,11 @@ export default async function HomePage() {
 
       {/* ───────────── CATEGORIES ───────────── */}
       {cats.length > 0 && (
-        <section className="section-dark py-20 lg:py-28">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <section className="section-dark py-20 lg:py-28 relative overflow-hidden">
+          <div className="absolute inset-0 pointer-events-none">
+            <div className="absolute bottom-0 left-0 w-[400px] h-[400px] rounded-full bg-[var(--accent-gold)] opacity-[0.015] blur-[100px]" />
+          </div>
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
             <div className="text-center max-w-2xl mx-auto mb-16">
               <span className="section-label">Browse By</span>
               <h2 className="text-3xl lg:text-4xl font-bold mt-6 mb-4">
@@ -205,13 +227,14 @@ export default async function HomePage() {
                 <Link
                   key={cat.id}
                   href={`/categories/${cat.slug}`}
-                  className="glass-card p-6 sm:p-8 text-center group animate-fade-in-up"
+                  className="glass-card p-6 sm:p-8 text-center group animate-fade-in-up hover:-translate-y-1"
                   style={{ animationDelay: `${i * 80}ms` }}
                 >
                   <div className="w-14 h-14 mx-auto rounded-full bg-[var(--accent-glow)] flex items-center justify-center text-2xl group-hover:scale-110 transition-transform duration-300">
                     {cat.icon || "📁"}
                   </div>
                   <h3 className="font-medium text-sm text-[var(--text-primary)] mt-4">{cat.name}</h3>
+                  <p className="text-xs text-[var(--text-dim)] mt-1 hidden group-hover:block transition-all">Browse →</p>
                 </Link>
               ))}
             </div>
@@ -232,7 +255,7 @@ export default async function HomePage() {
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             {[
               { num: "01", title: "Browse Products", desc: "Explore our collection of templates, apps, systems, and automation tools." },
               { num: "02", title: "Purchase Securely", desc: "Pay using Razorpay or PayPal — your payment is always protected." },
@@ -241,7 +264,7 @@ export default async function HomePage() {
             ].map((step, i) => (
               <div
                 key={step.num}
-                className="glass-card p-8 animate-fade-in-up"
+                className="glass-card p-8 animate-fade-in-up hover:-translate-y-1"
                 style={{ animationDelay: `${i * 120}ms` }}
               >
                 <div className="step-number">{step.num}</div>
@@ -275,7 +298,7 @@ export default async function HomePage() {
             ].map((item, i) => (
               <div
                 key={item.title}
-                className="glass-card p-8 animate-fade-in-up text-center"
+                className="glass-card p-8 animate-fade-in-up text-center hover:-translate-y-1"
                 style={{ animationDelay: `${i * 100}ms` }}
               >
                 <div className="w-16 h-16 mx-auto rounded-full bg-[var(--accent-glow)] flex items-center justify-center text-3xl">
@@ -290,13 +313,19 @@ export default async function HomePage() {
       </section>
 
       {/* ───────────── TESTIMONIALS ───────────── */}
-      <section className="section-dark-2 py-20 lg:py-28">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <section className="section-dark-2 py-20 lg:py-28 relative overflow-hidden">
+        <div className="absolute inset-0 pointer-events-none">
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] rounded-full bg-[var(--accent-gold)] opacity-[0.015] blur-[120px]" />
+        </div>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
           <div className="text-center max-w-2xl mx-auto mb-16">
             <span className="section-label">Testimonials</span>
             <h2 className="text-3xl lg:text-4xl font-bold mt-6 mb-4">
               What Clients <span className="gold-gradient">Say</span>
             </h2>
+            <p className="text-[var(--text-muted)] leading-relaxed">
+              Trusted by businesses, creators, and developers worldwide.
+            </p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -307,7 +336,7 @@ export default async function HomePage() {
             ].map((t, i) => (
               <div
                 key={t.name}
-                className="glass-card p-8 animate-fade-in-up"
+                className="glass-card p-8 animate-fade-in-up hover:-translate-y-1"
                 style={{ animationDelay: `${i * 100}ms` }}
               >
                 <div className="flex items-center gap-1 text-[var(--accent-gold)] mb-4">
@@ -336,6 +365,9 @@ export default async function HomePage() {
             <h2 className="text-3xl lg:text-4xl font-bold mt-6 mb-4">
               Frequently Asked <span className="gold-gradient">Questions</span>
             </h2>
+            <p className="text-[var(--text-muted)] leading-relaxed">
+              Everything you need to know about Scrollzea.
+            </p>
           </div>
 
           <div className="space-y-4">
@@ -369,7 +401,9 @@ export default async function HomePage() {
 
       {/* ───────────── FINAL CTA ───────────── */}
       <section className="section-dark-2 py-20 lg:py-28 relative overflow-hidden">
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] rounded-full bg-[var(--accent-gold)] opacity-[0.02] blur-[150px]" />
+        <div className="absolute inset-0 pointer-events-none">
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[700px] rounded-full bg-[var(--accent-gold)] opacity-[0.02] blur-[160px]" />
+        </div>
 
         <div className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative">
           <span className="section-label">Get Started</span>
@@ -379,7 +413,7 @@ export default async function HomePage() {
           <p className="text-[var(--text-muted)] leading-relaxed max-w-lg mx-auto">
             Browse our products or tell us about your custom project. We're here to help.
           </p>
-          <div className="flex flex-wrap justify-center gap-4 mt-10">
+          <div className="flex flex-col sm:flex-row justify-center gap-3 sm:gap-4 mt-10">
             <Link
               href="/products"
               className="btn-gold inline-flex items-center gap-2 px-8 py-3.5 rounded-xl text-base font-semibold"

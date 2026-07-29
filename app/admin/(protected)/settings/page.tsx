@@ -58,23 +58,34 @@ export default function SettingsPage() {
   return (
     <div>
       <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-bold">Website Settings</h1>
+        <h1 className="text-2xl font-bold" style={{ color: "var(--text-primary)" }}>Website Settings</h1>
         <Button onClick={saveAll} loading={saving}>
           {saved ? "Saved! ✅" : "Save All Settings"}
         </Button>
       </div>
 
-      <div className="bg-white rounded-xl border border-gray-100 p-6 space-y-6">
+      <div
+        className="rounded-xl p-6 space-y-6"
+        style={{
+          backgroundColor: "var(--bg-card)",
+          border: "1px solid var(--border-gold)",
+        }}
+      >
         {settingFields.map((field) => (
           <div key={field.key}>
             {field.type === "textarea" ? (
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1.5">{field.label}</label>
+                <label className="block text-sm font-medium mb-1.5" style={{ color: "var(--text-muted)" }}>{field.label}</label>
                 <textarea
                   value={settings[field.key] || ""}
                   onChange={(e) => updateSetting(field.key, e.target.value)}
                   rows={3}
-                  className="w-full px-4 py-2.5 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                  className="w-full px-4 py-2.5 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[var(--accent-gold)]"
+                  style={{
+                    backgroundColor: "var(--bg-primary)",
+                    border: "1px solid var(--border-gold)",
+                    color: "var(--text-primary)",
+                  }}
                 />
               </div>
             ) : (

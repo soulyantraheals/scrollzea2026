@@ -27,7 +27,7 @@ export default function EditProductPage() {
 
   return (
     <div>
-      <h1 className="text-2xl font-bold mb-6">Edit Product</h1>
+      <h1 className="text-2xl font-bold mb-6" style={{ color: "var(--text-primary)" }}>Edit Product</h1>
       <ProductForm product={product} categories={categories} />
     </div>
   );

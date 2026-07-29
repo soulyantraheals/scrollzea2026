@@ -41,11 +41,18 @@ export default function AdminDashboard() {
     { label: "Revenue", value: formatPrice(data.stats.totalRevenue), icon: TrendingUp },
   ] : [];
 
+  const sectionCardStyle = {
+    backgroundColor: "var(--bg-card)",
+    border: "1px solid var(--border-gold)",
+    borderRadius: "12px",
+    padding: "24px",
+  };
+
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold text-gray-900">Dashboard</h1>
-        <p className="text-gray-500 mt-1">Welcome to your Scrollzea admin panel.</p>
+        <h1 className="text-2xl font-bold" style={{ color: "var(--text-primary)" }}>Dashboard</h1>
+        <p className="mt-1" style={{ color: "var(--text-muted)" }}>Welcome to your Scrollzea admin panel.</p>
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
@@ -55,44 +62,52 @@ export default function AdminDashboard() {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <div className="bg-white rounded-xl border border-gray-100 p-6">
-          <h2 className="text-lg font-semibold text-gray-900 mb-4">Recent Orders</h2>
+        <div style={sectionCardStyle}>
+          <h2 className="text-lg font-semibold mb-4" style={{ color: "var(--text-primary)" }}>Recent Orders</h2>
           {data?.recentOrders && data.recentOrders.length > 0 ? (
             <div className="space-y-3">
               {data.recentOrders.slice(0, 5).map((order) => (
-                <div key={order.id} className="flex items-center justify-between py-2 border-b last:border-0">
+                <div key={order.id} className="flex items-center justify-between py-2" style={{ borderBottom: "1px solid var(--border-gold)" }}>
                   <div>
-                    <p className="text-sm font-medium text-gray-900">{order.orderNumber}</p>
-                    <p className="text-xs text-gray-500">{order.customerName}</p>
+                    <p className="text-sm font-medium" style={{ color: "var(--text-primary)" }}>{order.orderNumber}</p>
+                    <p className="text-xs" style={{ color: "var(--text-dim)" }}>{order.customerName}</p>
                   </div>
                   <div className="text-right">
-                    <p className="text-sm font-semibold">{formatPrice(order.totalAmount)}</p>
-                    <p className="text-xs text-gray-500">{formatDate(order.createdAt)}</p>
+                    <p className="text-sm font-semibold" style={{ color: "var(--accent-gold)" }}>{formatPrice(order.totalAmount)}</p>
+                    <p className="text-xs" style={{ color: "var(--text-dim)" }}>{formatDate(order.createdAt)}</p>
                   </div>
                 </div>
               ))}
             </div>
           ) : (
-            <p className="text-sm text-gray-500">No orders yet.</p>
+            <p className="text-sm" style={{ color: "var(--text-muted)" }}>No orders yet.</p>
           )}
         </div>
 
-        <div className="bg-white rounded-xl border border-gray-100 p-6">
-          <h2 className="text-lg font-semibold text-gray-900 mb-4">Recent Leads</h2>
+        <div style={sectionCardStyle}>
+          <h2 className="text-lg font-semibold mb-4" style={{ color: "var(--text-primary)" }}>Recent Leads</h2>
           {data?.recentLeads && data.recentLeads.length > 0 ? (
             <div className="space-y-3">
               {data.recentLeads.slice(0, 5).map((lead) => (
-                <div key={lead.id} className="flex items-center justify-between py-2 border-b last:border-0">
+                <div key={lead.id} className="flex items-center justify-between py-2" style={{ borderBottom: "1px solid var(--border-gold)" }}>
                   <div>
-                    <p className="text-sm font-medium text-gray-900">{lead.name}</p>
-                    <p className="text-xs text-gray-500">{lead.purpose || "General enquiry"}</p>
+                    <p className="text-sm font-medium" style={{ color: "var(--text-primary)" }}>{lead.name}</p>
+                    <p className="text-xs" style={{ color: "var(--text-dim)" }}>{lead.purpose || "General enquiry"}</p>
                   </div>
-                  <span className="text-xs px-2 py-1 rounded-full bg-yellow-100 text-yellow-700 capitalize">{lead.status}</span>
+                  <span
+                    className="text-xs px-2 py-1 rounded-full capitalize"
+                    style={{
+                      backgroundColor: "rgba(212, 175, 55, 0.1)",
+                      color: "var(--accent-gold)",
+                    }}
+                  >
+                    {lead.status}
+                  </span>
                 </div>
               ))}
             </div>
           ) : (
-            <p className="text-sm text-gray-500">No leads yet.</p>
+            <p className="text-sm" style={{ color: "var(--text-muted)" }}>No leads yet.</p>
           )}
         </div>
       </div>

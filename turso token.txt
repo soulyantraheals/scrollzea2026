@@ -1,3 +1,10 @@
+ as we tried to design the admin section like grit currently i dont see that fully functional according to the
+  dashboard, i hate the homepage bcz the two buttons are not working explore products , build something custom on
+  mobile n the homepage doesnot look professional enough, above Premium Digital Products Marketplace write welcome to
+  scrollzea  title n remove the premium from the sentence, keep the website light mode on load by default fix
+  everything
+
+
 https://scrollzea2026.vercel.app
 https://scrollzea2026.vercel.app/admin/login
 ==================================================================

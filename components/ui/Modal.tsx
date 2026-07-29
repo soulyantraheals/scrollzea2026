@@ -34,10 +34,12 @@ export function Modal({ open, onClose, title, children, className }: ModalProps)
       className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm"
       onClick={(e) => e.target === e.currentTarget && onClose()}
     >
-      <div className={cn("bg-white rounded-2xl shadow-xl max-w-lg w-full max-h-[90vh] overflow-y-auto", className)}>
-        <div className="flex items-center justify-between p-6 border-b">
-          {title && <h2 className="text-lg font-semibold">{title}</h2>}
-          <button onClick={onClose} className="p-1 rounded-lg hover:bg-gray-100 transition-colors">
+      <div className={cn("rounded-2xl shadow-xl max-w-lg w-full max-h-[90vh] overflow-y-auto", className)}
+        style={{ backgroundColor: "var(--bg-card)", border: "1px solid var(--border-gold)" }}
+      >
+        <div className="flex items-center justify-between p-6" style={{ borderBottom: "1px solid var(--border-gold)" }}>
+          {title && <h2 className="text-lg font-semibold" style={{ color: "var(--text-primary)" }}>{title}</h2>}
+          <button onClick={onClose} className="p-1 rounded-lg transition-colors" style={{ color: "var(--text-muted)" }}>
             <X className="h-5 w-5" />
           </button>
         </div>

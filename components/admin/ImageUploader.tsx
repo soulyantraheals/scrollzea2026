@@ -62,33 +62,53 @@ export function ImageUploader({ images, onImagesChange }: ImageUploaderProps) {
     <div className="space-y-4">
       <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
         {images.map((img, i) => (
-          <div key={i} className="relative group aspect-square rounded-lg border border-gray-200 overflow-hidden bg-gray-50">
+          <div
+            key={i}
+            className="relative group aspect-square rounded-lg overflow-hidden"
+            style={{ border: "1px solid var(--border-gold)", backgroundColor: "var(--bg-secondary)" }}
+          >
             <img src={img.url} alt="" className="w-full h-full object-cover" />
             <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
               <button
                 onClick={() => setPrimary(i)}
-                className={`p-1.5 rounded-full ${img.isPrimary ? "bg-amber-400 text-white" : "bg-white text-gray-700"}`}
+                className="p-1.5 rounded-full transition-colors"
+                style={{
+                  backgroundColor: img.isPrimary ? "var(--accent-gold)" : "var(--bg-card)",
+                  color: img.isPrimary ? "#fff" : "var(--text-primary)",
+                }}
               >
                 <Star className="h-4 w-4" fill={img.isPrimary ? "currentColor" : "none"} />
               </button>
-              <button onClick={() => removeImage(i)} className="p-1.5 rounded-full bg-red-500 text-white">
+              <button
+                onClick={() => removeImage(i)}
+                className="p-1.5 rounded-full bg-red-500 text-white"
+              >
                 <X className="h-4 w-4" />
               </button>
             </div>
             {img.isPrimary && (
-              <span className="absolute top-2 left-2 bg-amber-400 text-white text-xs px-2 py-0.5 rounded-full">
+              <span className="absolute top-2 left-2 text-xs px-2 py-0.5 rounded-full"
+                style={{ backgroundColor: "var(--accent-gold)", color: "#fff" }}
+              >
                 Primary
               </span>
             )}
           </div>
         ))}
-        <label className="aspect-square rounded-lg border-2 border-dashed border-gray-200 hover:border-indigo-400 cursor-pointer flex flex-col items-center justify-center gap-2 text-gray-400 hover:text-indigo-600 transition-colors bg-gray-50">
+        <label
+          className="aspect-square rounded-lg border-2 border-dashed cursor-pointer flex flex-col items-center justify-center gap-2 transition-colors"
+          style={{
+            borderColor: "var(--border-gold)",
+            color: "var(--text-dim)",
+            backgroundColor: "var(--bg-secondary)",
+          }}
+        >
           <Upload className="h-6 w-6" />
           <span className="text-xs">{uploading ? "Uploading..." : "Upload"}</span>
           <input type="file" accept="image/*" multiple onChange={handleUpload} className="hidden" disabled={uploading} />
         </label>
       </div>
-      <p className="text-xs text-gray-500">First image is primary. Max 4MB per image.</p>
+      <p className="text-xs" style={{ color: "var(--text-dim)" }}>First image is primary. Max 4MB per image.</p>
     </div>
   );
 }

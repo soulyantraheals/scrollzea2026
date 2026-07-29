@@ -34,10 +34,13 @@ export default function ProductsPage() {
 
   if (loading) return <LoadingSpinner />;
 
+  const tdStyle = { padding: "12px 16px", color: "var(--text-primary)" };
+  const thStyle = { padding: "12px 16px", textAlign: "left" as const, fontWeight: 500, color: "var(--text-muted)" };
+
   return (
     <div>
       <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-bold">Products</h1>
+        <h1 className="text-2xl font-bold" style={{ color: "var(--text-primary)" }}>Products</h1>
         <Link href="/admin/products/new">
           <Button><Plus className="h-4 w-4" /> Add Product</Button>
         </Link>
@@ -50,54 +53,71 @@ export default function ProductsPage() {
           action={<Link href="/admin/products/new"><Button>Add Product</Button></Link>}
         />
       ) : (
-        <div className="bg-white rounded-xl border border-gray-100 overflow-hidden">
+        <div
+          className="overflow-hidden rounded-xl"
+          style={{ backgroundColor: "var(--bg-card)", border: "1px solid var(--border-gold)" }}
+        >
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
-              <thead className="border-b bg-gray-50">
-                <tr>
-                  <th className="text-left px-4 py-3 font-medium text-gray-600">Product</th>
-                  <th className="text-left px-4 py-3 font-medium text-gray-600">Type</th>
-                  <th className="text-left px-4 py-3 font-medium text-gray-600">Price</th>
-                  <th className="text-left px-4 py-3 font-medium text-gray-600">Status</th>
-                  <th className="text-center px-4 py-3 font-medium text-gray-600">Featured</th>
-                  <th className="text-center px-4 py-3 font-medium text-gray-600">Best Seller</th>
-                  <th className="text-right px-4 py-3 font-medium text-gray-600">Actions</th>
+              <thead style={{ backgroundColor: "var(--bg-secondary)" }}>
+                <tr style={{ borderBottom: "1px solid var(--border-gold)" }}>
+                  <th style={thStyle}>Product</th>
+                  <th style={thStyle}>Type</th>
+                  <th style={thStyle}>Price</th>
+                  <th style={thStyle}>Status</th>
+                  <th style={thStyle} className="text-center">Featured</th>
+                  <th style={thStyle} className="text-center">Best Seller</th>
+                  <th style={thStyle} className="text-right">Actions</th>
                 </tr>
               </thead>
-              <tbody className="divide-y">
+              <tbody>
                 {products.map((p) => (
-                  <tr key={p.id} className="hover:bg-gray-50">
-                    <td className="px-4 py-3">
+                  <tr key={p.id} style={{ borderBottom: "1px solid var(--border-gold)", backgroundColor: "transparent" }}>
+                    <td style={tdStyle}>
                       <div className="flex items-center gap-3">
                         {p.images?.[0] && (
                           <img src={p.images[0].imageUrl} alt="" className="w-10 h-10 rounded-lg object-cover" />
                         )}
                         <div>
-                          <p className="font-medium text-gray-900">{p.name}</p>
-                          <p className="text-xs text-gray-500">ID: {p.id}</p>
+                          <p className="font-medium">{p.name}</p>
+                          <p className="text-xs" style={{ color: "var(--text-dim)" }}>ID: {p.id}</p>
                         </div>
                       </div>
                     </td>
-                    <td className="px-4 py-3">
+                    <td style={tdStyle}>
                       <Badge variant={p.productType === "FREE" ? "free" : p.productType === "PREBOOK" ? "prebook" : "default"}>
                         {p.productType}
                       </Badge>
                     </td>
-                    <td className="px-4 py-3 font-medium">{formatPrice(p.price)}</td>
-                    <td className="px-4 py-3">
-                      <span className={`text-xs px-2 py-1 rounded-full ${p.status === "published" ? "bg-emerald-100 text-emerald-700" : "bg-gray-100 text-gray-600"}`}>
+                    <td style={{ ...tdStyle, fontWeight: 500 }}>{formatPrice(p.price)}</td>
+                    <td style={tdStyle}>
+                      <span
+                        className="text-xs px-2 py-1 rounded-full"
+                        style={{
+                          backgroundColor: p.status === "published" ? "rgba(34, 197, 94, 0.1)" : "rgba(107, 123, 118, 0.1)",
+                          color: p.status === "published" ? "#22C55E" : "var(--text-dim)",
+                        }}
+                      >
                         {p.status}
                       </span>
                     </td>
-                    <td className="px-4 py-3 text-center">{p.featured ? "⭐" : "—"}</td>
-                    <td className="px-4 py-3 text-center">{p.bestSeller ? "🏆" : "—"}</td>
-                    <td className="px-4 py-3 text-right">
+                    <td style={{ ...tdStyle, textAlign: "center" }}>{p.featured ? "⭐" : "—"}</td>
+                    <td style={{ ...tdStyle, textAlign: "center" }}>{p.bestSeller ? "🏆" : "—"}</td>
+                    <td style={{ ...tdStyle, textAlign: "right" }}>
                       <div className="flex items-center justify-end gap-2">
-                        <Link href={`/admin/products/${p.id}/edit`} className="p-1.5 hover:bg-gray-100 rounded-lg">
-                          <Pencil className="h-4 w-4 text-gray-600" />
+                        <Link
+                          href={`/admin/products/${p.id}/edit`}
+                          className="p-1.5 rounded-lg transition-colors"
+                          style={{ color: "var(--text-muted)" }}
+                        >
+                          <Pencil className="h-4 w-4" />
                         </Link>
-                        <button onClick={() => deleteProduct(p.id)} className="p-1.5 hover:bg-red-50 rounded-lg">
-                          <Trash2 className="h-4 w-4 text-red-500" />
+                        <button
+                          onClick={() => deleteProduct(p.id)}
+                          className="p-1.5 rounded-lg transition-colors"
+                          style={{ color: "#EF4444" }}
+                        >
+                          <Trash2 className="h-4 w-4" />
                         </button>
                       </div>
                     </td>

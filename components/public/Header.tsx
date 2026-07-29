@@ -7,7 +7,7 @@ import { Menu, X } from "lucide-react";
 export function Header() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
-  const [darkMode, setDarkMode] = useState(true);
+  const [darkMode, setDarkMode] = useState(false);
 
   // Track scroll for transparent→solid navbar
   useEffect(() => {
@@ -16,10 +16,13 @@ export function Header() {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  // Theme toggle
+  // Theme toggle — light mode by default
   useEffect(() => {
     const stored = localStorage.getItem("scrollzea-theme");
-    if (stored === "light") {
+    if (stored === "dark") {
+      setDarkMode(true);
+    } else {
+      // Default to light mode
       setDarkMode(false);
       document.documentElement.classList.add("light-theme");
     }
