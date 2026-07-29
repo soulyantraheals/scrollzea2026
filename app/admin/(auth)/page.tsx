@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef, FormEvent } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 
 export default function AdminLoginPage() {
   const router = useRouter();
@@ -26,13 +26,15 @@ export default function AdminLoginPage() {
 
   // Show error from URL param
   useEffect(() => {
-    const err = searchParams.get("error");
+    if (typeof window === "undefined") return;
+    const params = new URLSearchParams(window.location.search);
+    const err = params.get("error");
     if (err === "CredentialsSignin") {
       setError("Invalid email or password");
     } else if (err === "MissingCSRF") {
       setError("Session expired. Please try again.");
     }
-  }, [searchParams]);
+  }, []);
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
