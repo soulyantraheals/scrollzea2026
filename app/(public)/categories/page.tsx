@@ -24,32 +24,35 @@ export default async function CategoriesPage() {
   );
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-      <h1 className="text-3xl font-bold text-gray-900 mb-8">Categories</h1>
-      {categoriesWithCounts.length === 0 ? (
-        <p className="text-gray-500 text-center py-16">No categories available yet.</p>
-      ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {categoriesWithCounts.map((cat) => (
-            <Link
-              key={cat.id}
-              href={`/categories/${cat.slug}`}
-              className="p-8 rounded-xl border border-gray-100 bg-white hover:border-indigo-200 hover:shadow-md transition-all group"
-            >
-              <div className="w-14 h-14 rounded-full bg-indigo-50 flex items-center justify-center text-2xl group-hover:bg-indigo-100 transition-colors">
-                {cat.icon || "📁"}
-              </div>
-              <h2 className="text-xl font-semibold text-gray-900 mt-4">{cat.name}</h2>
-              {cat.description && (
-                <p className="text-sm text-gray-500 mt-2">{cat.description}</p>
-              )}
-              <p className="text-sm text-indigo-600 font-medium mt-3">
-                {cat.productCount} product{cat.productCount !== 1 ? "s" : ""}
-              </p>
-            </Link>
-          ))}
-        </div>
-      )}
+    <div className="min-h-screen" style={{ backgroundColor: "var(--bg-primary)" }}>
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <h1 className="text-3xl font-bold mb-8" style={{ color: "var(--text-primary)" }}>Categories</h1>
+        {categoriesWithCounts.length === 0 ? (
+          <p className="text-center py-16" style={{ color: "var(--text-muted)" }}>No categories available yet.</p>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {categoriesWithCounts.map((cat) => (
+              <Link
+                key={cat.id}
+                href={`/categories/${cat.slug}`}
+                className="glass-card p-8 text-center group animate-fade-in-up"
+              >
+                <div className="w-14 h-14 mx-auto rounded-full flex items-center justify-center text-2xl group-hover:scale-110 transition-transform duration-300"
+                  style={{ backgroundColor: "var(--accent-glow)" }}>
+                  {cat.icon || "📁"}
+                </div>
+                <h2 className="text-xl font-semibold mt-4" style={{ color: "var(--text-primary)" }}>{cat.name}</h2>
+                {cat.description && (
+                  <p className="text-sm mt-2" style={{ color: "var(--text-muted)" }}>{cat.description}</p>
+                )}
+                <p className="text-sm font-medium mt-3" style={{ color: "var(--accent-gold)" }}>
+                  {cat.productCount} product{cat.productCount !== 1 ? "s" : ""}
+                </p>
+              </Link>
+            ))}
+          </div>
+        )}
+      </div>
     </div>
   );
 }

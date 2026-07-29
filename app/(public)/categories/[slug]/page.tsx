@@ -42,23 +42,25 @@ export default async function CategoryDetailPage({ params }: Props) {
   );
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900">{category.name}</h1>
-        {category.description && (
-          <p className="text-gray-600 mt-2">{category.description}</p>
+    <div className="min-h-screen" style={{ backgroundColor: "var(--bg-primary)" }}>
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold" style={{ color: "var(--text-primary)" }}>{category.name}</h1>
+          {category.description && (
+            <p className="mt-2" style={{ color: "var(--text-muted)" }}>{category.description}</p>
+          )}
+        </div>
+
+        {productsWithImages.length === 0 ? (
+          <p className="text-center py-16" style={{ color: "var(--text-muted)" }}>No products in this category yet.</p>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            {productsWithImages.map((product) => (
+              <ProductCard key={product.id} product={product} />
+            ))}
+          </div>
         )}
       </div>
-
-      {productsWithImages.length === 0 ? (
-        <p className="text-gray-500 text-center py-16">No products in this category yet.</p>
-      ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-          {productsWithImages.map((product) => (
-            <ProductCard key={product.id} product={product} />
-          ))}
-        </div>
-      )}
     </div>
   );
 }

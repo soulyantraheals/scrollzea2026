@@ -47,52 +47,55 @@ export default async function ProductsPage({ searchParams }: Props) {
     })
   );
 
+  const isActive = (flag: boolean) => flag;
+  const activeStyle = { backgroundColor: "var(--accent-gold)", color: "var(--bg-primary)" };
+  const inactiveStyle = { backgroundColor: "var(--bg-card)", color: "var(--text-muted)" };
+
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-      <h1 className="text-3xl font-bold text-gray-900 mb-8">All Products</h1>
+    <div className="min-h-screen" style={{ backgroundColor: "var(--bg-primary)" }}>
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <h1 className="text-3xl font-bold mb-8" style={{ color: "var(--text-primary)" }}>All Products</h1>
 
-      {/* Filters */}
-      <div className="flex flex-wrap gap-3 mb-8">
-        <a
-          href="/products"
-          className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-            !category && !type ? "bg-indigo-600 text-white" : "bg-gray-100 text-gray-600 hover:bg-gray-200"
-          }`}
-        >
-          All
-        </a>
-        {allCategories.map((cat) => (
+        {/* Filters */}
+        <div className="flex flex-wrap gap-3 mb-8">
           <a
-            key={cat.id}
-            href={`/products?category=${cat.id}`}
-            className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-              category === String(cat.id) ? "bg-indigo-600 text-white" : "bg-gray-100 text-gray-600 hover:bg-gray-200"
-            }`}
+            href="/products"
+            className="px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 hover:opacity-80"
+            style={!category && !type ? activeStyle : inactiveStyle}
           >
-            {cat.name}
+            All
           </a>
-        ))}
-        <a
-          href="/products?type=FREE"
-          className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-            type === "FREE" ? "bg-emerald-600 text-white" : "bg-gray-100 text-gray-600 hover:bg-gray-200"
-          }`}
-        >
-          Free
-        </a>
-      </div>
-
-      {productsWithImages.length === 0 ? (
-        <div className="text-center py-16">
-          <p className="text-gray-500">No products found.</p>
-        </div>
-      ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-          {productsWithImages.map((product) => (
-            <ProductCard key={product.id} product={product} />
+          {allCategories.map((cat) => (
+            <a
+              key={cat.id}
+              href={`/products?category=${cat.id}`}
+              className="px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 hover:opacity-80"
+              style={category === String(cat.id) ? activeStyle : inactiveStyle}
+            >
+              {cat.name}
+            </a>
           ))}
+          <a
+            href="/products?type=FREE"
+            className="px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 hover:opacity-80"
+            style={type === "FREE" ? { backgroundColor: "#059669", color: "#FFFFFF" } : inactiveStyle}
+          >
+            Free
+          </a>
         </div>
-      )}
+
+        {productsWithImages.length === 0 ? (
+          <div className="text-center py-16">
+            <p style={{ color: "var(--text-muted)" }}>No products found.</p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            {productsWithImages.map((product) => (
+              <ProductCard key={product.id} product={product} />
+            ))}
+          </div>
+        )}
+      </div>
     </div>
   );
 }

@@ -30,25 +30,27 @@ export default async function ServicesPage() {
   );
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-      <div className="mb-10">
-        <h1 className="text-3xl font-bold text-gray-900">Custom Digital Services</h1>
-        <p className="text-gray-600 mt-2">
-          Pre-book custom digital services with a 30% advance. We'll build what you need.
-        </p>
-      </div>
+    <div className="min-h-screen" style={{ backgroundColor: "var(--bg-primary)" }}>
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <div className="mb-10">
+          <h1 className="text-3xl font-bold" style={{ color: "var(--text-primary)" }}>Custom Digital Services</h1>
+          <p className="mt-2" style={{ color: "var(--text-muted)" }}>
+            Pre-book custom digital services with a 30% advance. We'll build what you need.
+          </p>
+        </div>
 
-      {servicesWithImages.length === 0 ? (
-        <div className="text-center py-16">
-          <p className="text-gray-500">No services listed yet. Contact us for custom requirements.</p>
-        </div>
-      ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {servicesWithImages.map((service) => (
-            <ProductCard key={service.id} product={service} />
-          ))}
-        </div>
-      )}
+        {servicesWithImages.length === 0 ? (
+          <div className="text-center py-16">
+            <p style={{ color: "var(--text-muted)" }}>No services listed yet. Contact us for custom requirements.</p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {servicesWithImages.map((service) => (
+              <ProductCard key={service.id} product={service} />
+            ))}
+          </div>
+        )}
+      </div>
     </div>
   );
 }

@@ -55,130 +55,137 @@ export default async function ProductDetailPage({ params }: Props) {
   const enabledPayments = product.paymentOptions?.filter((p) => p.enabled && p.paymentUrl) || [];
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
-        {/* Image */}
-        <div className="aspect-square rounded-2xl bg-gray-50 overflow-hidden">
-          {primaryImage ? (
-            <img src={primaryImage.imageUrl} alt={product.name} className="w-full h-full object-cover" />
-          ) : (
-            <div className="w-full h-full flex items-center justify-center text-gray-300 text-lg">No Image</div>
-          )}
-        </div>
-
-        {/* Info */}
-        <div>
-          <div className="flex flex-wrap items-center gap-2 mb-3">
-            {product.productType === "FREE" && <Badge variant="free">FREE</Badge>}
-            {product.productType === "PREBOOK" && <Badge variant="prebook">Pre-book</Badge>}
-            {product.bestSeller ? <Badge variant="best-seller">🏆 Best Seller</Badge> : null}
-            {product.featured ? <Badge variant="featured">Featured</Badge> : null}
-          </div>
-
-          <h1 className="text-3xl lg:text-4xl font-bold text-gray-900">{product.name}</h1>
-
-          {product.shortDescription && (
-            <p className="mt-4 text-lg text-gray-600 leading-relaxed">{product.shortDescription}</p>
-          )}
-
-          {/* Price */}
-          <div className="mt-6 p-6 bg-gray-50 rounded-xl">
-            {isFree ? (
-              <p className="text-3xl font-bold text-emerald-600">FREE</p>
+    <div className="min-h-screen" style={{ backgroundColor: "var(--bg-primary)" }}>
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
+          {/* Image */}
+          <div className="aspect-square rounded-2xl overflow-hidden" style={{ backgroundColor: "var(--bg-secondary)" }}>
+            {primaryImage ? (
+              <img src={primaryImage.imageUrl} alt={product.name} className="w-full h-full object-cover" />
             ) : (
-              <div className="space-y-1">
-                <p className="text-3xl font-bold text-gray-900">
-                  {hasDiscount ? formatPrice(product.discountPrice!) : formatPrice(product.price)}
-                </p>
-                {hasDiscount && (
-                  <p className="text-lg text-gray-400 line-through">{formatPrice(product.price)}</p>
-                )}
-              </div>
-            )}
-
-            {/* Pre-book calculator */}
-            {product.productType === "PREBOOK" && (
-              <div className="mt-4 p-4 bg-blue-50 rounded-lg space-y-1.5 text-sm">
-                <p className="text-blue-800 font-medium">Pre-book with {product.advancePercentage}% advance</p>
-                <p className="text-blue-700">Total: <strong>{formatPrice(product.price)}</strong></p>
-                <p className="text-blue-700">Advance ({product.advancePercentage}%): <strong>{formatPrice(advanceAmount)}</strong></p>
-                <p className="text-blue-700">Remaining: <strong>{formatPrice(product.price - advanceAmount)}</strong></p>
-              </div>
+              <div className="w-full h-full flex items-center justify-center" style={{ color: "var(--text-dim)" }}>No Image</div>
             )}
           </div>
 
-          {/* Description */}
-          {product.description && (
-            <div className="mt-6">
-              <h2 className="font-semibold text-gray-900 mb-2">Description</h2>
-              <div className="text-gray-600 leading-relaxed whitespace-pre-line text-sm">
-                {product.description}
-              </div>
+          {/* Info */}
+          <div>
+            <div className="flex flex-wrap items-center gap-2 mb-3">
+              {product.productType === "FREE" && <Badge variant="free">FREE</Badge>}
+              {product.productType === "PREBOOK" && <Badge variant="prebook">Pre-book</Badge>}
+              {product.bestSeller ? <Badge variant="best-seller">🏆 Best Seller</Badge> : null}
+              {product.featured ? <Badge variant="featured">Featured</Badge> : null}
             </div>
-          )}
 
-          {/* Payment Options */}
-          <div className="mt-6 space-y-3">
-            {enabledPayments.map((pm) => (
-              <a
-                key={pm.id}
-                href={pm.paymentUrl || "#"}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="block w-full"
-              >
-                <Button
-                  variant={
-                    pm.provider === "RAZORPAY"
-                      ? "primary"
-                      : pm.provider === "PAYPAL"
-                      ? "secondary"
-                      : "outline"
-                  }
-                  className="w-full justify-center"
+            <h1 className="text-3xl lg:text-4xl font-bold" style={{ color: "var(--text-primary)" }}>{product.name}</h1>
+
+            {product.shortDescription && (
+              <p className="mt-4 text-lg leading-relaxed" style={{ color: "var(--text-muted)" }}>{product.shortDescription}</p>
+            )}
+
+            {/* Price */}
+            <div className="mt-6 p-6 rounded-xl" style={{ backgroundColor: "var(--bg-secondary)" }}>
+              {isFree ? (
+                <p className="text-3xl font-bold" style={{ color: "var(--accent-gold)" }}>FREE</p>
+              ) : (
+                <div className="space-y-1">
+                  <p className="text-3xl font-bold" style={{ color: "var(--text-primary)" }}>
+                    {hasDiscount ? formatPrice(product.discountPrice!) : formatPrice(product.price)}
+                  </p>
+                  {hasDiscount && (
+                    <p className="text-lg line-through" style={{ color: "var(--text-dim)" }}>{formatPrice(product.price)}</p>
+                  )}
+                </div>
+              )}
+
+              {/* Pre-book calculator */}
+              {product.productType === "PREBOOK" && (
+                <div className="mt-4 p-4 rounded-lg" style={{ backgroundColor: "rgba(59,130,246,0.1)" }}>
+                  <p className="font-medium" style={{ color: "#60A5FA" }}>Pre-book with {product.advancePercentage}% advance</p>
+                  <p className="mt-1" style={{ color: "#93C5FD" }}>Total: <strong>{formatPrice(product.price)}</strong></p>
+                  <p style={{ color: "#93C5FD" }}>Advance ({product.advancePercentage}%): <strong>{formatPrice(advanceAmount)}</strong></p>
+                  <p style={{ color: "#93C5FD" }}>Remaining: <strong>{formatPrice(product.price - advanceAmount)}</strong></p>
+                </div>
+              )}
+            </div>
+
+            {/* Description */}
+            {product.description && (
+              <div className="mt-6">
+                <h2 className="font-semibold mb-2" style={{ color: "var(--text-primary)" }}>Description</h2>
+                <div className="leading-relaxed whitespace-pre-line text-sm" style={{ color: "var(--text-muted)" }}>
+                  {product.description}
+                </div>
+              </div>
+            )}
+
+            {/* Payment Options / CTA */}
+            <div className="mt-6 space-y-3">
+              {enabledPayments.map((pm) => (
+                <a
+                  key={pm.id}
+                  href={pm.paymentUrl || "#"}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="block w-full"
                 >
-                  {pm.provider === "RAZORPAY" && "Pay with Razorpay"}
-                  {pm.provider === "PAYPAL" && "Pay with PayPal"}
-                  {pm.provider === "WHATSAPP" && "Chat on WhatsApp"}
-                </Button>
-              </a>
-            ))}
-          </div>
-
-          {/* Features */}
-          {product.features?.length > 0 && (
-            <div className="mt-8">
-              <h2 className="font-semibold text-gray-900 mb-3">What's Included</h2>
-              <ul className="space-y-2">
-                {product.features.map((f: any) => (
-                  <li key={f.id} className="flex items-start gap-2 text-sm text-gray-600">
-                    <span className="text-emerald-500 mt-0.5">✓</span>
-                    {f.feature}
-                  </li>
-                ))}
-              </ul>
+                  <div
+                    className="w-full py-3 px-6 rounded-xl text-center font-semibold transition-all hover:opacity-90"
+                    style={{
+                      background: pm.provider === "RAZORPAY"
+                        ? "linear-gradient(135deg, var(--accent-gold), var(--accent-gold-light))"
+                        : pm.provider === "PAYPAL"
+                        ? "linear-gradient(135deg, #0070BA, #1546A0)"
+                        : "linear-gradient(135deg, #25D366, #128C7E)",
+                      color: "#FFFFFF",
+                    }}
+                  >
+                    {pm.provider === "RAZORPAY" && "Pay with Razorpay"}
+                    {pm.provider === "PAYPAL" && "Pay with PayPal"}
+                    {pm.provider === "WHATSAPP" && "Chat on WhatsApp"}
+                  </div>
+                </a>
+              ))}
             </div>
-          )}
-        </div>
-      </div>
 
-      {/* FAQ */}
-      {product.faqs?.length > 0 && (
-        <div className="mt-16 max-w-2xl">
-          <h2 className="text-2xl font-bold text-gray-900 mb-6">Frequently Asked Questions</h2>
-          <div className="space-y-4">
-            {product.faqs.map((faq: any) => (
-              <details key={faq.id} className="group">
-                <summary className="flex justify-between items-center cursor-pointer py-4 px-4 rounded-lg bg-gray-50 hover:bg-gray-100">
-                  <span className="font-medium text-gray-900">{faq.question}</span>
-                  <span className="text-gray-400 group-open:rotate-180 transition-transform">▼</span>
-                </summary>
-                <p className="px-4 py-3 text-gray-600 text-sm leading-relaxed">{faq.answer}</p>
-              </details>
-            ))}
+            {/* Features */}
+            {product.features?.length > 0 && (
+              <div className="mt-8">
+                <h2 className="font-semibold mb-3" style={{ color: "var(--text-primary)" }}>What's Included</h2>
+                <ul className="space-y-2">
+                  {product.features.map((f: any) => (
+                    <li key={f.id} className="flex items-start gap-2 text-sm" style={{ color: "var(--text-muted)" }}>
+                      <span className="mt-0.5" style={{ color: "var(--accent-gold)" }}>✓</span>
+                      {f.feature}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
           </div>
         </div>
-      )}
+
+        {/* FAQ */}
+        {product.faqs?.length > 0 && (
+          <div className="mt-16 max-w-2xl">
+            <h2 className="text-2xl font-bold mb-6" style={{ color: "var(--text-primary)" }}>Frequently Asked Questions</h2>
+            <div className="space-y-4">
+              {product.faqs.map((faq: any) => (
+                <details key={faq.id} className="glass-card group open:border-[var(--border-gold-hover)]">
+                  <summary className="flex justify-between items-center cursor-pointer py-5 px-6 list-none">
+                    <span className="font-medium text-sm pr-4" style={{ color: "var(--text-primary)" }}>{faq.question}</span>
+                    <svg className="h-4 w-4 shrink-0 transition-transform duration-200 group-open:rotate-180" style={{ color: "var(--accent-gold)" }} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+                    </svg>
+                  </summary>
+                  <div className="px-6 pb-5 border-t" style={{ borderColor: "var(--border-gold)" }}>
+                    <p className="text-sm pt-4 leading-relaxed" style={{ color: "var(--text-muted)" }}>{faq.answer}</p>
+                  </div>
+                </details>
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
     </div>
   );
 }

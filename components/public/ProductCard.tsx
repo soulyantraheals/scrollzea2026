@@ -43,33 +43,20 @@ export function ProductCard({ product }: ProductCardProps) {
     }
   };
 
-  const getCtaColor = () => {
-    switch (product.productType) {
-      case "FREE":
-        return "bg-emerald-600 hover:bg-emerald-700";
-      case "PREBOOK":
-        return "bg-blue-600 hover:bg-blue-700";
-      case "CUSTOM_QUOTE":
-        return "bg-amber-600 hover:bg-amber-700";
-      default:
-        return "bg-indigo-600 hover:bg-indigo-700";
-    }
-  };
-
   return (
     <Link href={`/products/${product.slug}`} className="group block">
-      <div className="bg-white rounded-xl border border-gray-100 overflow-hidden transition-all duration-200 hover:shadow-lg hover:border-gray-200">
+      <div className="product-card">
         {/* Image */}
-        <div className="aspect-[4/3] bg-gray-50 relative overflow-hidden">
+        <div className="aspect-[4/3] relative overflow-hidden" style={{ backgroundColor: "var(--bg-secondary)" }}>
           {primaryImage ? (
             <img
               src={primaryImage.imageUrl}
               alt={product.name}
-              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
             />
           ) : (
-            <div className="w-full h-full flex items-center justify-center text-gray-300">
-              <svg className="h-12 w-12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div className="w-full h-full flex items-center justify-center" style={{ color: "var(--text-dim)" }}>
+              <svg className="h-12 w-12 opacity-30" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
               </svg>
             </div>
@@ -85,7 +72,8 @@ export function ProductCard({ product }: ProductCardProps) {
             ) : null}
             {isFree && <Badge variant="free">FREE</Badge>}
             {discountPercent > 0 && (
-              <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-700">
+              <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium"
+                style={{ backgroundColor: "rgba(239,68,68,0.15)", color: "#EF4444" }}>
                 -{discountPercent}%
               </span>
             )}
@@ -106,12 +94,12 @@ export function ProductCard({ product }: ProductCardProps) {
         </div>
 
         {/* Info */}
-        <div className="p-4">
-          <h3 className="font-semibold text-gray-900 group-hover:text-indigo-600 transition-colors line-clamp-1">
+        <div className="p-5">
+          <h3 className="font-semibold line-clamp-1" style={{ color: "var(--text-primary)" }}>
             {product.name}
           </h3>
           {product.shortDescription && (
-            <p className="text-sm text-gray-500 mt-1 line-clamp-2">
+            <p className="text-sm mt-1.5 line-clamp-2 leading-relaxed" style={{ color: "var(--text-muted)" }}>
               {product.shortDescription}
             </p>
           )}
@@ -119,16 +107,16 @@ export function ProductCard({ product }: ProductCardProps) {
           {/* Price */}
           <div className="flex items-center gap-2 mt-3">
             {isFree ? (
-              <span className="text-lg font-bold text-emerald-600">FREE</span>
+              <span className="text-lg font-bold" style={{ color: "var(--accent-gold)" }}>FREE</span>
             ) : (
               <>
-                <span className="text-lg font-bold text-gray-900">
+                <span className="text-lg font-bold" style={{ color: "var(--accent-gold)" }}>
                   {hasDiscount
                     ? formatPrice(product.discountPrice!)
                     : formatPrice(product.price)}
                 </span>
                 {hasDiscount && (
-                  <span className="text-sm text-gray-400 line-through">
+                  <span className="text-sm line-through" style={{ color: "var(--text-dim)" }}>
                     {formatPrice(product.price)}
                   </span>
                 )}
@@ -138,7 +126,11 @@ export function ProductCard({ product }: ProductCardProps) {
 
           {/* CTA */}
           <div
-            className={`mt-3 px-4 py-2 rounded-lg text-white text-sm font-medium text-center transition-all ${getCtaColor()}`}
+            className="mt-4 px-4 py-2.5 rounded-xl text-sm font-semibold text-center transition-all"
+            style={{
+              background: "linear-gradient(135deg, var(--accent-gold), var(--accent-gold-light))",
+              color: "var(--bg-primary)",
+            }}
           >
             {getCTAText()}
           </div>
