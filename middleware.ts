@@ -13,7 +13,11 @@ export default function middleware(req: NextRequest) {
   }
 
   // Simple cookie check — NextAuth v5 JWT session cookie
-  const sessionToken = req.cookies.get("authjs.session-token")?.value;
+  // Handles both HTTP (authjs.*) and HTTPS (__Secure-authjs.*) prefixes
+  const sessionToken =
+    req.cookies.get("__Secure-authjs.session-token")?.value ||
+    req.cookies.get("authjs.session-token")?.value ||
+    req.cookies.get("next-auth.session-token")?.value;
 
   // Redirect unauthenticated users to login page (/admin)
   if (isAdminRoute && !isAdminRoot && !sessionToken) {

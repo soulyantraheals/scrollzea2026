@@ -40,16 +40,21 @@ export default function AdminLoginPage() {
         email,
         password,
         redirect: false,
-        callbackUrl: "/admin/dashboard",
       });
 
-      if (result?.ok && !result?.error) {
-        router.push("/admin/dashboard");
-        router.refresh();
-      } else {
+      if (result?.error) {
+        console.error("Login error:", result.error);
         setError("Invalid email or password");
+      } else if (result?.ok || result?.status === 200) {
+        // Give cookie a moment to set, then navigate
+        await new Promise((r) => setTimeout(r, 300));
+        window.location.href = "/admin/dashboard";
+      } else {
+        console.error("Login unexpected:", result);
+        setError("Login failed. Please try again.");
       }
-    } catch {
+    } catch (err) {
+      console.error("Login exception:", err);
       setError("Connection error. Please check your network and try again.");
     }
     setLoading(false);
