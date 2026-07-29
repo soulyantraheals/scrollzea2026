@@ -5,7 +5,6 @@ import { useRouter } from "next/navigation";
 
 export default function AdminLoginPage() {
   const router = useRouter();
-  const searchParams = useSearchParams();
   const [csrfToken, setCsrfToken] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
