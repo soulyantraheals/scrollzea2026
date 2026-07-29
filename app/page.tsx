@@ -4,6 +4,7 @@ import Link from "next/link";
 import { db } from "@/lib/db";
 import { products, categories } from "@/db/schema";
 import { eq, desc, asc, sql } from "drizzle-orm";
+import { HomeSearchBar } from "@/components/public/HomeSearchBar";
 
 async function getHomepageData() {
   try {
@@ -81,7 +82,12 @@ export default async function HomePage() {
               Buy professional website templates, management systems, Flutter apps, automation tools, and custom digital solutions that save weeks of work.
             </p>
 
-            <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 mt-10">
+            {/* Search Bar */}
+            <div className="mt-8 max-w-lg">
+              <HomeSearchBar />
+            </div>
+
+            <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 mt-8">
               <Link
                 href="/products"
                 className="btn-gold inline-flex items-center justify-center gap-2 px-8 py-3.5 rounded-xl text-base font-semibold"

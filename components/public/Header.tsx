@@ -1,13 +1,19 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
-import { Menu, X } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { Menu, X, Search, Moon, Sun } from "lucide-react";
 
 export function Header() {
+  const router = useRouter();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [darkMode, setDarkMode] = useState(false);
+  const [searchOpen, setSearchOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const searchInputRef = useRef<HTMLInputElement>(null);
+  const searchContainerRef = useRef<HTMLDivElement>(null);
 
   // Track scroll for transparent→solid navbar
   useEffect(() => {
@@ -22,11 +28,37 @@ export function Header() {
     if (stored === "dark") {
       setDarkMode(true);
     } else {
-      // Default to light mode
       setDarkMode(false);
       document.documentElement.classList.add("light-theme");
     }
   }, []);
+
+  // Focus search input when opened
+  useEffect(() => {
+    if (searchOpen && searchInputRef.current) {
+      searchInputRef.current.focus();
+    }
+  }, [searchOpen]);
+
+  // Close search on click outside
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (searchContainerRef.current && !searchContainerRef.current.contains(e.target as Node)) {
+        if (!searchQuery) setSearchOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [searchQuery]);
+
+  const doSearch = (q: string) => {
+    const trimmed = q.trim();
+    if (!trimmed) return;
+    setSearchOpen(false);
+    setSearchQuery("");
+    setMobileOpen(false);
+    router.push(`/products?search=${encodeURIComponent(trimmed)}`);
+  };
 
   const toggleTheme = () => {
     const next = !darkMode;
@@ -54,7 +86,7 @@ export function Header() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16 lg:h-20">
           {/* Logo + Brand */}
-          <Link href="/" className="flex items-center gap-3 group">
+          <Link href="/" className="flex items-center gap-3 group shrink-0">
             <img
               src="/logo.jpg"
               alt="Scrollzea"
@@ -74,53 +106,74 @@ export function Header() {
                 {link.label}
               </Link>
             ))}
+
+            {/* Desktop Search */}
+            <div ref={searchContainerRef} className="relative ml-2">
+              {searchOpen ? (
+                <div className="flex items-center gap-1">
+                  <input
+                    ref={searchInputRef}
+                    type="text"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    onKeyDown={(e) => e.key === "Enter" && doSearch(searchQuery)}
+                    placeholder="Search products..."
+                    className="w-48 lg:w-56 px-3 py-2 rounded-lg text-sm outline-none transition-all"
+                    style={{
+                      backgroundColor: "var(--bg-card)",
+                      border: "1px solid var(--border-gold)",
+                      color: "var(--text-primary)",
+                    }}
+                  />
+                  <button
+                    onClick={() => doSearch(searchQuery)}
+                    className="p-2 rounded-lg text-[var(--accent-gold)] hover:bg-[var(--accent-glow)] transition-all"
+                    aria-label="Search"
+                  >
+                    <Search className="h-4 w-4" />
+                  </button>
+                </div>
+              ) : (
+                <button
+                  onClick={() => setSearchOpen(true)}
+                  className="p-2.5 rounded-lg border border-[var(--border-gold)] text-[var(--accent-gold)] hover:bg-[var(--accent-glow)] transition-all duration-200"
+                  aria-label="Open search"
+                >
+                  <Search className="h-4 w-4" />
+                </button>
+              )}
+            </div>
+
             {/* Contact Us */}
             <Link
               href="/contact"
-              className="btn-gold ml-4 inline-flex items-center gap-2 px-5 py-2 rounded-lg text-sm font-semibold"
+              className="btn-gold ml-2 inline-flex items-center gap-2 px-5 py-2 rounded-lg text-sm font-semibold"
             >
               Contact Us
             </Link>
+
             {/* Theme Toggle */}
             <button
               onClick={toggleTheme}
               className="ml-2 p-2.5 rounded-lg border border-[var(--border-gold)] text-[var(--accent-gold)] hover:bg-[var(--accent-glow)] transition-all duration-200"
               aria-label="Toggle theme"
             >
-              {darkMode ? (
-                <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
-                </svg>
-              ) : (
-                <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
-                </svg>
-              )}
+              {darkMode ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
             </button>
           </nav>
 
-          {/* Mobile Menu Button */}
+          {/* Mobile: Search + Menu */}
           <div className="flex items-center gap-2 md:hidden">
-            <Link
-              href="/contact"
-              className="btn-gold px-4 py-1.5 rounded-lg text-sm font-semibold"
-            >
-              Contact
-            </Link>
+            {/* Mobile Search Button */}
             <button
-              onClick={toggleTheme}
+              onClick={() => {
+                setSearchOpen(!searchOpen);
+                setTimeout(() => searchInputRef.current?.focus(), 100);
+              }}
               className="p-2 rounded-lg border border-[var(--border-gold)] text-[var(--accent-gold)]"
-              aria-label="Toggle theme"
+              aria-label="Search"
             >
-              {darkMode ? (
-                <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
-                </svg>
-              ) : (
-                <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
-                </svg>
-              )}
+              <Search className="h-4 w-4" />
             </button>
             <button
               onClick={() => setMobileOpen(!mobileOpen)}
@@ -130,6 +183,34 @@ export function Header() {
             </button>
           </div>
         </div>
+
+        {/* Mobile: Inline Search Bar (when search is open) */}
+        {searchOpen && (
+          <div className="md:hidden pb-3">
+            <div className="flex items-center gap-2">
+              <input
+                ref={searchInputRef}
+                type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                onKeyDown={(e) => e.key === "Enter" && doSearch(searchQuery)}
+                placeholder="Search products..."
+                className="flex-1 px-4 py-2.5 rounded-lg text-sm outline-none"
+                style={{
+                  backgroundColor: "var(--bg-card)",
+                  border: "1px solid var(--border-gold)",
+                  color: "var(--text-primary)",
+                }}
+              />
+              <button
+                onClick={() => doSearch(searchQuery)}
+                className="btn-gold px-4 py-2.5 rounded-lg text-sm font-semibold"
+              >
+                Search
+              </button>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Mobile Nav */}
@@ -146,6 +227,22 @@ export function Header() {
                 {link.label}
               </Link>
             ))}
+            <div className="pt-2 flex items-center gap-2">
+              <Link
+                href="/contact"
+                onClick={() => setMobileOpen(false)}
+                className="btn-gold flex-1 text-center px-4 py-2.5 rounded-lg text-sm font-semibold"
+              >
+                Contact Us
+              </Link>
+              <button
+                onClick={toggleTheme}
+                className="p-2.5 rounded-lg border border-[var(--border-gold)] text-[var(--accent-gold)]"
+                aria-label="Toggle theme"
+              >
+                {darkMode ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+              </button>
+            </div>
           </div>
         </div>
       )}

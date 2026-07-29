@@ -3,6 +3,7 @@ import { db } from "@/lib/db";
 import { products, categories, productImages } from "@/db/schema";
 import { eq, desc, asc, sql, and } from "drizzle-orm";
 import { ProductCard } from "@/components/public/ProductCard";
+import { ProductsSearchBar } from "@/components/public/ProductsSearchBar";
 
 interface Props {
   searchParams: Promise<{ category?: string; type?: string; search?: string }>;
@@ -54,7 +55,10 @@ export default async function ProductsPage({ searchParams }: Props) {
   return (
     <div className="min-h-screen" style={{ backgroundColor: "var(--bg-primary)" }}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <h1 className="text-3xl font-bold mb-8" style={{ color: "var(--text-primary)" }}>All Products</h1>
+        <h1 className="text-3xl font-bold mb-6" style={{ color: "var(--text-primary)" }}>All Products</h1>
+
+        {/* Search */}
+        <ProductsSearchBar initialSearch={search || ""} />
 
         {/* Filters */}
         <div className="flex flex-wrap gap-3 mb-8">
