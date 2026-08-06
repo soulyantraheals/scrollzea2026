@@ -71,6 +71,8 @@ export const products = sqliteTable("products", {
   offerLabel: text("offer_label").notNull().default("Limited Time Offer"),
   paymentDescription: text("payment_description").notNull().default("One-time payment · Lifetime access · No subscriptions"),
   ctaText: text("cta_text").notNull().default("Get Instant Access Now"),
+  secondaryCtaText: text("secondary_cta_text").notNull().default("Contact Us"),
+  secondaryCtaUrl: text("secondary_cta_url"),
   socialProofText: text("social_proof_text").notNull().default("Join 50,000+ satisfied customers"),
 
   // Urgency / Countdown
@@ -109,13 +111,16 @@ export const productFeatures = sqliteTable("product_features", {
   createdAt: text("created_at").notNull().default("datetime('now')"),
 });
 
-// Payment Options
+// Payment Options (dynamic providers — label/icon are what customers see)
 export const paymentOptions = sqliteTable("payment_options", {
   id: integer("id").primaryKey({ autoIncrement: true }),
   productId: integer("product_id").notNull(),
-  provider: text("provider", { enum: ["RAZORPAY", "PAYPAL", "WHATSAPP"] }).notNull(),
+  provider: text("provider").notNull(), // machine key, free text (e.g. "gumroad")
+  label: text("label"),                 // display name (e.g. "Gumroad")
+  icon: text("icon"),                   // optional emoji (e.g. "🛍️")
   paymentUrl: text("payment_url"),
   enabled: integer("enabled").notNull().default(1),
+  sortOrder: integer("sort_order").notNull().default(0),
   createdAt: text("created_at").notNull().default("datetime('now')"),
 });
 
@@ -197,7 +202,7 @@ export const clickEvents = sqliteTable("click_events", {
   productId: integer("product_id"),
   productName: text("product_name"),
   eventType: text("event_type", {
-    enum: ["razorpay_click", "paypal_click", "whatsapp_click", "download_click", "view_detail", "share"],
+    enum: ["razorpay_click", "paypal_click", "whatsapp_click", "download_click", "payment_click", "view_detail", "share"],
   }).notNull(),
   source: text("source"),
   referrer: text("referrer"),
