@@ -127,7 +127,9 @@ export function ProductCard({ product }: ProductCardProps) {
           <div
             className="mt-4 px-4 py-2.5 rounded-xl text-sm font-semibold text-center transition-all"
             style={{
-              background: "linear-gradient(135deg, var(--accent-gold), var(--accent-gold-light))",
+              background: isFree
+                ? "linear-gradient(135deg, #22C55E, #16A34A)"
+                : "linear-gradient(135deg, var(--accent-gold), var(--accent-gold-light))",
               color: "var(--bg-primary)",
             }}
           >

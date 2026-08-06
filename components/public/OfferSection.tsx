@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { CountdownTimer } from "./CountdownTimer";
 import { PurchaseCta } from "./PurchaseCta";
+import { formatMoney } from "@/lib/money";
 
 interface PaymentOption {
   id: number;
@@ -41,21 +42,6 @@ interface OfferSectionProps {
     expiresAt: string | null;
     paymentOptions: PaymentOption[];
   };
-}
-
-function moneySymbol(currency: string) {
-  if (!currency) return "₹";
-  const c = currency.toUpperCase();
-  if (c === "USD" || c === "US" || c === "DOLLAR") return "$";
-  if (c === "EUR") return "€";
-  if (c === "GBP") return "£";
-  return "₹";
-}
-
-function formatMoney(value: number, currency: string) {
-  const sym = moneySymbol(currency);
-  if (sym === "₹") return `₹${value.toLocaleString("en-IN")}`;
-  return `${sym}${value.toLocaleString("en-US")}`;
 }
 
 export function OfferSection({ product }: OfferSectionProps) {

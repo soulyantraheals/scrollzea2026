@@ -5,7 +5,7 @@ import { eq } from "drizzle-orm";
 
 // Handles free-product downloads:
 //  - Records a download_click for analytics
-//  - If lead capture is required, also stores a lead so the admin can follow up
+//  - Stores a lead (name/email/phone) so the admin can follow up
 export async function POST(req: Request) {
   try {
     const body = await req.json();
@@ -34,14 +34,10 @@ export async function POST(req: Request) {
       referrer: req.headers.get("referer") || null,
     });
 
-    // Lead capture (only when the product requires it and info is provided)
-    if (product.leadCaptureRequired) {
-      if (!name || !email || !phone) {
-        return NextResponse.json(
-          { error: "Name, email, and phone are required" },
-          { status: 400 }
-        );
-      }
+    // Lead capture: store a lead whenever the free form was filled in.
+    // Every FREE download goes through the name/email/phone form, so this
+    // runs regardless of the per-product leadCaptureRequired toggle.
+    if (name && email && phone) {
       await db.insert(leads).values({
         name,
         email,

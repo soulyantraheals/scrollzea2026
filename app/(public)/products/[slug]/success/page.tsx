@@ -5,6 +5,7 @@ import { db } from "@/lib/db";
 import { products } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { notFound } from "next/navigation";
+import { formatMoney } from "@/lib/money";
 
 interface Props {
   params: Promise<{ slug: string }>;
@@ -41,11 +42,11 @@ export default async function PurchaseSuccessPage({ params, searchParams }: Prop
           {!isFree && (
             <div className="mt-6 flex items-end justify-center gap-3">
               <span className="text-3xl font-extrabold" style={{ color: "var(--text-primary)" }}>
-                ₹{product.price.toLocaleString("en-IN")}
+                {formatMoney(product.price, product.currency)}
               </span>
               {hasDiscount && (
                 <span className="text-lg line-through mb-0.5" style={{ color: "var(--text-dim)" }}>
-                  ₹{product.discountPrice!.toLocaleString("en-IN")}
+                  {formatMoney(product.discountPrice!, product.currency)}
                 </span>
               )}
             </div>

@@ -190,7 +190,17 @@ export default async function HomePage() {
                           </span>
                         )}
                       </div>
-                      <span className="text-xs text-[var(--text-dim)] group-hover:text-[var(--accent-gold)] transition-colors">View Details →</span>
+                      <div
+                        className="px-3 py-1.5 rounded-lg text-xs font-semibold text-center transition-all"
+                        style={{
+                          background: product.productType === "FREE" && product.price === 0
+                            ? "linear-gradient(135deg, #22C55E, #16A34A)"
+                            : "linear-gradient(135deg, var(--accent-gold), var(--accent-gold-light))",
+                          color: "var(--bg-primary)",
+                        }}
+                      >
+                        {product.productType === "FREE" ? "Get Free" : product.productType === "PREBOOK" ? "Pre-book Now" : product.productType === "CUSTOM_QUOTE" ? "Request Quote" : "Buy Now"}
+                      </div>
                     </div>
                   </div>
                 </Link>

@@ -8,6 +8,7 @@ import { formatDate } from "@/lib/utils";
 export default function LeadsPage() {
   const [leads, setLeads] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [productFilter, setProductFilter] = useState("all");
 
   const fetchLeads = async () => {
     try {
@@ -49,6 +50,17 @@ export default function LeadsPage() {
 
   if (loading) return <LoadingSpinner />;
 
+  const productCounts = leads.reduce<Record<string, number>>((acc, lead: any) => {
+    const name = lead.productName || "—";
+    acc[name] = (acc[name] || 0) + 1;
+    return acc;
+  }, {});
+
+  const filteredLeads =
+    productFilter === "all"
+      ? leads
+      : leads.filter((lead: any) => (lead.productName || "—") === productFilter);
+
   const tdStyle = { padding: "12px 16px", color: "var(--text-primary)" };
   const thStyle = { padding: "12px 16px", textAlign: "left" as const, fontWeight: 500, color: "var(--text-muted)" };
 
@@ -58,31 +70,50 @@ export default function LeadsPage() {
       {leads.length === 0 ? (
         <EmptyState title="No leads yet" description="Leads from contact forms and free product downloads will appear here." />
       ) : (
-        <div
-          className="overflow-hidden rounded-xl"
-          style={{ backgroundColor: "var(--bg-card)", border: "1px solid var(--border-gold)" }}
-        >
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead style={{ backgroundColor: "var(--bg-secondary)" }}>
-                <tr style={{ borderBottom: "1px solid var(--border-gold)" }}>
-                  <th style={thStyle}>Name</th>
-                  <th style={thStyle}>Contact</th>
-                  <th style={thStyle}>Purpose</th>
-                  <th style={thStyle}>Status</th>
-                  <th style={thStyle}>Date</th>
-                  <th style={{ ...thStyle, textAlign: "right" }}>Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {leads.map((lead: any) => (
-                  <tr key={lead.id} style={{ borderBottom: "1px solid var(--border-gold)" }}>
-                    <td style={tdStyle} className="font-medium">{lead.name}</td>
-                    <td style={{ ...tdStyle, color: "var(--text-muted)" }}>
-                      <p>{lead.email}</p>
-                      <p className="text-xs" style={{ color: "var(--text-dim)" }}>{lead.phone}</p>
-                    </td>
-                    <td style={{ ...tdStyle, color: "var(--text-muted)" }}>{lead.purpose || "—"}</td>
+        <>
+          <div className="mb-4 flex flex-wrap items-center gap-2">
+            <label className="text-sm" style={{ color: "var(--text-muted)" }}>Product:</label>
+            <select
+              value={productFilter}
+              onChange={(e) => setProductFilter(e.target.value)}
+              className="px-3 py-2 rounded-lg text-sm cursor-pointer"
+              style={{ backgroundColor: "var(--bg-primary)", border: "1px solid var(--border-gold)", color: "var(--text-primary)" }}
+            >
+              <option value="all">All products ({leads.length})</option>
+              {Object.entries(productCounts)
+                .sort((a, b) => b[1] - a[1])
+                .map(([name, count]) => (
+                  <option key={name} value={name}>{name} ({count})</option>
+                ))}
+            </select>
+          </div>
+          <div
+            className="overflow-hidden rounded-xl"
+            style={{ backgroundColor: "var(--bg-card)", border: "1px solid var(--border-gold)" }}
+          >
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead style={{ backgroundColor: "var(--bg-secondary)" }}>
+                  <tr style={{ borderBottom: "1px solid var(--border-gold)" }}>
+                    <th style={thStyle}>Name</th>
+                    <th style={thStyle}>Contact</th>
+                    <th style={thStyle}>Product</th>
+                    <th style={thStyle}>Purpose</th>
+                    <th style={thStyle}>Status</th>
+                    <th style={thStyle}>Date</th>
+                    <th style={{ ...thStyle, textAlign: "right" }}>Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {filteredLeads.map((lead: any) => (
+                    <tr key={lead.id} style={{ borderBottom: "1px solid var(--border-gold)" }}>
+                      <td style={tdStyle} className="font-medium">{lead.name}</td>
+                      <td style={{ ...tdStyle, color: "var(--text-muted)" }}>
+                        <p>{lead.email}</p>
+                        <p className="text-xs" style={{ color: "var(--text-dim)" }}>{lead.phone}</p>
+                      </td>
+                      <td style={{ ...tdStyle, color: "var(--text-muted)" }}>{lead.productName || "—"}</td>
+                      <td style={{ ...tdStyle, color: "var(--text-muted)" }}>{lead.purpose || "—"}</td>
                     <td style={tdStyle}>
                       <select
                         value={lead.status}
@@ -117,6 +148,7 @@ export default function LeadsPage() {
             </table>
           </div>
         </div>
+        </>
       )}
     </div>
   );

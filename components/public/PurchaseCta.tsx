@@ -74,6 +74,7 @@ export function PurchaseCta({ product, size = "lg", compact = false }: PurchaseC
   const [downloadUrl, setDownloadUrl] = useState<string | null>(null);
   const [error, setError] = useState("");
   const [leadForm, setLeadForm] = useState({ name: "", email: "", phone: "" });
+  const [submitted, setSubmitted] = useState(false);
   const menuRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
@@ -97,6 +98,10 @@ export function PurchaseCta({ product, size = "lg", compact = false }: PurchaseC
     !!product.downloadUrl || product.deliveryMethod === "download" || product.deliveryMethod === "external_link";
   const pad = size === "lg" ? "16px 24px" : "12px 20px";
   const fontSize = size === "lg" ? "1.05rem" : "0.95rem";
+  // All FREE CTAs are green; paid / PREBOOK / CUSTOM_QUOTE stay gold.
+  const ctaGradient = isFree
+    ? "linear-gradient(135deg, #22C55E, #16A34A)"
+    : "linear-gradient(135deg, var(--accent-gold), var(--accent-gold-light))";
 
   const handleDownload = async () => {
     setLoading(true);
@@ -109,7 +114,7 @@ export function PurchaseCta({ product, size = "lg", compact = false }: PurchaseC
         body: JSON.stringify({
           productId: product.id,
           productName: product.name,
-          ...(product.leadCaptureRequired ? leadForm : {}),
+          ...leadForm,
         }),
       });
       const data = await res.json();
@@ -117,6 +122,7 @@ export function PurchaseCta({ product, size = "lg", compact = false }: PurchaseC
         setError(data.error || "Something went wrong");
         return;
       }
+      setSubmitted(true);
       if (data.downloadUrl) {
         window.open(data.downloadUrl, "_blank");
         setDownloadUrl(data.downloadUrl);
@@ -138,13 +144,10 @@ export function PurchaseCta({ product, size = "lg", compact = false }: PurchaseC
     setOpen(false);
   };
 
+  // FREE downloads always go through the lead form first
   const freeDownloadAction = () => {
-    if (product.leadCaptureRequired) {
-      setShowLeadForm(true);
-      setOpen(false);
-    } else {
-      handleDownload();
-    }
+    setShowLeadForm(true);
+    setOpen(false);
   };
 
   // Dropdown trigger (used when providers exist and the main action is the menu)
@@ -152,7 +155,7 @@ export function PurchaseCta({ product, size = "lg", compact = false }: PurchaseC
     <button
       type="button"
       onClick={() => setOpen((v) => !v)}
-      style={{ ...btnBase, padding: pad, fontSize, background: "linear-gradient(135deg, var(--accent-gold), var(--accent-gold-light))" }}
+      style={{ ...btnBase, padding: pad, fontSize, background: ctaGradient }}
     >
       {ctaLabel}
       {showChevron && <ChevronDown className="h-4 w-4" style={{ opacity: 0.8 }} />}
@@ -215,96 +218,83 @@ export function PurchaseCta({ product, size = "lg", compact = false }: PurchaseC
     </a>
   );
 
-  const downloadSuccess = (
-    <div
-      className="text-center py-4 px-4 rounded-xl text-sm space-y-2"
-      style={{ backgroundColor: "var(--accent-glow)", border: "1px solid var(--border-gold)", color: "var(--text-primary)" }}
-    >
-      <p>✅ Thank you! Your download is in progress. Check your browser downloads.</p>
-      <a href={`/products/${product.slug}/success?provider=download`} className="block font-semibold" style={{ color: "var(--accent-gold)" }}>
-        View confirmation →
-      </a>
-    </div>
-  );
-
   // ---- FREE ----
   if (isFree) {
-    if (enabledPayments.length === 0) {
-      // Fallback: existing lead-capture + download flow
-      if (product.leadCaptureRequired && !downloadUrl && !loading) {
+    const freeForm = (
+      <form onSubmit={(e) => { e.preventDefault(); handleDownload(); }} className="space-y-3">
+        <input type="text" placeholder="Your name *" value={leadForm.name} onChange={(e) => setLeadForm({ ...leadForm, name: e.target.value })} required className="w-full px-4 py-3 rounded-xl text-sm" style={{ backgroundColor: "var(--bg-primary)", border: "1px solid var(--border-gold)", color: "var(--text-primary)" }} />
+        <input type="email" placeholder="Your email *" value={leadForm.email} onChange={(e) => setLeadForm({ ...leadForm, email: e.target.value })} required className="w-full px-4 py-3 rounded-xl text-sm" style={{ backgroundColor: "var(--bg-primary)", border: "1px solid var(--border-gold)", color: "var(--text-primary)" }} />
+        <input type="tel" placeholder="Your phone / WhatsApp *" value={leadForm.phone} onChange={(e) => setLeadForm({ ...leadForm, phone: e.target.value })} required className="w-full px-4 py-3 rounded-xl text-sm" style={{ backgroundColor: "var(--bg-primary)", border: "1px solid var(--border-gold)", color: "var(--text-primary)" }} />
+        {error && <p className="text-sm" style={{ color: "#EF4444" }}>{error}</p>}
+        <button type="submit" disabled={loading} style={{ ...btnBase, padding: pad, fontSize, background: ctaGradient }}>
+          {loading ? <Loader2 className="h-5 w-5 animate-spin" /> : null}
+          {ctaLabel}
+        </button>
+      </form>
+    );
+
+    const freeSuccess = (
+      <div
+        className="text-center py-4 px-4 rounded-xl text-sm space-y-2"
+        style={{ backgroundColor: "var(--accent-glow)", border: "1px solid var(--border-gold)", color: "var(--text-primary)" }}
+      >
+        {downloadUrl ? (
+          <>
+            <p>✅ Thank you! Your download is ready.</p>
+            <a href={downloadUrl} target="_blank" rel="noopener noreferrer" className="block font-semibold" style={{ color: "#22C55E" }}>
+              ⬇️ Download now
+            </a>
+          </>
+        ) : (
+          <p>✅ Thank you! We&apos;ve received your details. We&apos;ll send your download link shortly.</p>
+        )}
+        <a href={`/products/${product.slug}/success?provider=download`} className="block font-semibold" style={{ color: "var(--accent-gold)" }}>
+          View confirmation →
+        </a>
+      </div>
+    );
+
+    // After a successful submit, show the download / thank-you state
+    if (submitted) {
+      return (
+        <div className="space-y-3">
+          {freeSuccess}
+          {error && <p className="text-sm" style={{ color: "#EF4444" }}>{error}</p>}
+          {secondaryButton}
+        </div>
+      );
+    }
+
+    // FREE with providers → green dropdown; "Download now" opens the form first
+    if (enabledPayments.length > 0) {
+      if (showLeadForm) {
         return (
           <div className="space-y-3">
-            <form
-              onSubmit={(e) => { e.preventDefault(); handleDownload(); }}
-              className="space-y-3"
-            >
-              <input type="text" placeholder="Your name *" value={leadForm.name} onChange={(e) => setLeadForm({ ...leadForm, name: e.target.value })} required className="w-full px-4 py-3 rounded-xl text-sm" style={{ backgroundColor: "var(--bg-primary)", border: "1px solid var(--border-gold)", color: "var(--text-primary)" }} />
-              <input type="email" placeholder="Your email *" value={leadForm.email} onChange={(e) => setLeadForm({ ...leadForm, email: e.target.value })} required className="w-full px-4 py-3 rounded-xl text-sm" style={{ backgroundColor: "var(--bg-primary)", border: "1px solid var(--border-gold)", color: "var(--text-primary)" }} />
-              <input type="tel" placeholder="Your phone / WhatsApp *" value={leadForm.phone} onChange={(e) => setLeadForm({ ...leadForm, phone: e.target.value })} required className="w-full px-4 py-3 rounded-xl text-sm" style={{ backgroundColor: "var(--bg-primary)", border: "1px solid var(--border-gold)", color: "var(--text-primary)" }} />
-              {error && <p className="text-sm" style={{ color: "#EF4444" }}>{error}</p>}
-              <button type="submit" disabled={loading} style={{ ...btnBase, padding: pad, fontSize, background: "linear-gradient(135deg, var(--accent-gold), var(--accent-gold-light))" }}>
-                {loading ? <Loader2 className="h-5 w-5 animate-spin" /> : null}
-                {ctaLabel}
-              </button>
-            </form>
-            <p className="text-xs text-center" style={{ color: "var(--text-dim)" }}>Enter your details to get instant access.</p>
+            {freeForm}
             {secondaryButton}
           </div>
         );
       }
-
       return (
         <div className="space-y-3">
-          {downloadUrl || !product.leadCaptureRequired ? (
-            downloadUrl ? (
-              downloadSuccess
-            ) : (
-              <button onClick={handleDownload} disabled={loading} style={{ ...btnBase, padding: pad, fontSize, background: "linear-gradient(135deg, var(--accent-gold), var(--accent-gold-light))" }}>
-                {loading ? <Loader2 className="h-5 w-5 animate-spin" /> : null}
-                {ctaLabel}
-              </button>
-            )
-          ) : (
-            <div className="text-center py-4 px-4 rounded-xl text-sm" style={{ backgroundColor: "var(--accent-glow)", border: "1px solid var(--border-gold)", color: "var(--text-primary)" }}>
-              ✅ Thank you! We&apos;ve received your details. We&apos;ll send your download link shortly.
-              <a href={`/products/${product.slug}/success?provider=download`} className="block font-semibold mt-2" style={{ color: "var(--accent-gold)" }}>View confirmation →</a>
-            </div>
-          )}
+          {providerMenu()}
+          {confirmCard}
           {error && <p className="text-sm" style={{ color: "#EF4444" }}>{error}</p>}
-          {product.deliveryMethod === "manual" && !product.downloadUrl && (
-            <p className="text-xs text-center" style={{ color: "var(--text-dim)" }}>
-              We&apos;ll deliver this free resource to you via WhatsApp / email.
-            </p>
-          )}
           {secondaryButton}
         </div>
       );
     }
 
-    // FREE with providers → dropdown (+ download option)
-    if (showLeadForm && !downloadUrl && !loading) {
-      return (
-        <div className="space-y-3">
-          <form onSubmit={(e) => { e.preventDefault(); handleDownload(); }} className="space-y-3">
-            <input type="text" placeholder="Your name *" value={leadForm.name} onChange={(e) => setLeadForm({ ...leadForm, name: e.target.value })} required className="w-full px-4 py-3 rounded-xl text-sm" style={{ backgroundColor: "var(--bg-primary)", border: "1px solid var(--border-gold)", color: "var(--text-primary)" }} />
-            <input type="email" placeholder="Your email *" value={leadForm.email} onChange={(e) => setLeadForm({ ...leadForm, email: e.target.value })} required className="w-full px-4 py-3 rounded-xl text-sm" style={{ backgroundColor: "var(--bg-primary)", border: "1px solid var(--border-gold)", color: "var(--text-primary)" }} />
-            <input type="tel" placeholder="Your phone / WhatsApp *" value={leadForm.phone} onChange={(e) => setLeadForm({ ...leadForm, phone: e.target.value })} required className="w-full px-4 py-3 rounded-xl text-sm" style={{ backgroundColor: "var(--bg-primary)", border: "1px solid var(--border-gold)", color: "var(--text-primary)" }} />
-            {error && <p className="text-sm" style={{ color: "#EF4444" }}>{error}</p>}
-            <button type="submit" disabled={loading} style={{ ...btnBase, padding: pad, fontSize, background: "linear-gradient(135deg, var(--accent-gold), var(--accent-gold-light))" }}>
-              {loading ? <Loader2 className="h-5 w-5 animate-spin" /> : null}
-              {ctaLabel}
-            </button>
-          </form>
-          {secondaryButton}
-        </div>
-      );
-    }
-
+    // FREE without providers → form always shows before download
     return (
       <div className="space-y-3">
-        {downloadUrl ? downloadSuccess : providerMenu()}
+        {freeForm}
+        {product.deliveryMethod === "manual" && !product.downloadUrl && (
+          <p className="text-xs text-center" style={{ color: "var(--text-dim)" }}>
+            We&apos;ll deliver this free resource to you via WhatsApp / email.
+          </p>
+        )}
         {error && <p className="text-sm" style={{ color: "#EF4444" }}>{error}</p>}
-        {confirmCard}
         {secondaryButton}
       </div>
     );

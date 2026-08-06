@@ -18,6 +18,7 @@ import { ProductGallery } from "@/components/public/ProductGallery";
 import { YouTubeEmbed } from "@/components/public/YouTubeEmbed";
 import { OfferSection } from "@/components/public/OfferSection";
 import { PurchaseCta } from "@/components/public/PurchaseCta";
+import { formatMoney } from "@/lib/money";
 import type { Metadata } from "next";
 
 interface Props {
@@ -190,11 +191,11 @@ export default async function ProductDetailPage({ params }: Props) {
               ) : (
                 <div className="flex items-baseline gap-3 mb-3">
                   <p className="text-3xl font-bold" style={{ color: "var(--text-primary)" }}>
-                    ₹{product.price.toLocaleString("en-IN")}
+                    {formatMoney(product.price, product.currency)}
                   </p>
                   {hasDiscount && (
                     <p className="text-lg line-through" style={{ color: "var(--text-dim)" }}>
-                      ₹{product.discountPrice!.toLocaleString("en-IN")}
+                      {formatMoney(product.discountPrice!, product.currency)}
                     </p>
                   )}
                 </div>
