@@ -11,6 +11,7 @@ import {
 } from "@/db/schema";
 import { eq, desc } from "drizzle-orm";
 import { auth } from "@/lib/auth";
+import { slugify } from "@/lib/utils";
 
 export async function GET() {
   const session = await auth();
@@ -72,11 +73,14 @@ export async function POST(req: Request) {
 
   if (payments?.length) {
     await db.insert(paymentOptions).values(
-      payments.map((p: any) => ({
+      payments.map((p: any, i: number) => ({
         productId: result.id,
-        provider: p.provider,
+        provider: (p.label || "").trim() ? slugify(p.label.trim()) : `link-${i}`,
+        label: p.label?.trim() || null,
+        icon: p.icon?.trim() || null,
         paymentUrl: p.paymentUrl,
         enabled: 1,
+        sortOrder: i,
       }))
     );
   }
