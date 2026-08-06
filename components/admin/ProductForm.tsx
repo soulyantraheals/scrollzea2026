@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { ImageUploader } from "@/components/admin/ImageUploader";
-import { PaymentOptionsEditor } from "@/components/admin/PaymentOptionsEditor";
+import { PaymentOptionsEditor, humanizeProvider, providerDefaultIcon } from "@/components/admin/PaymentOptionsEditor";
 import { ListEditor } from "@/components/admin/ListEditor";
 import { slugify } from "@/lib/utils";
 
@@ -94,6 +94,8 @@ export function ProductForm({ product, categories }: ProductFormProps) {
     offerLabel: product?.offerLabel || "Limited Time Offer",
     paymentDescription: product?.paymentDescription || "One-time payment · Lifetime access · No subscriptions",
     ctaText: product?.ctaText || "Get Instant Access Now",
+    secondaryCtaText: product?.secondaryCtaText || "Contact Us",
+    secondaryCtaUrl: product?.secondaryCtaUrl || "",
     socialProofText: product?.socialProofText || "Join 50,000+ satisfied customers",
     // Hurry-up countdown
     urgencyEnabled: bool(product?.urgencyEnabled),
@@ -111,19 +113,16 @@ export function ProductForm({ product, categories }: ProductFormProps) {
   });
 
   const [paymentOptions, setPaymentOptions] = useState<
-    Array<{ provider: string; paymentUrl: string; enabled: boolean }>
+    Array<{ label: string; icon: string; paymentUrl: string; enabled: boolean }>
   >(
     product?.paymentOptions?.length
       ? product.paymentOptions.map((p: any) => ({
-          provider: p.provider,
+          label: p.label || humanizeProvider(p.provider || ""),
+          icon: p.icon || providerDefaultIcon(p.provider || ""),
           paymentUrl: p.paymentUrl || "",
           enabled: p.enabled ? true : false,
         }))
-      : [
-          { provider: "RAZORPAY", paymentUrl: "", enabled: false },
-          { provider: "PAYPAL", paymentUrl: "", enabled: false },
-          { provider: "WHATSAPP", paymentUrl: "", enabled: false },
-        ]
+      : []
   );
 
   const [images, setImages] = useState<
@@ -196,7 +195,16 @@ export function ProductForm({ product, categories }: ProductFormProps) {
         isPrimary: img.isPrimary ? 1 : 0,
         sortOrder: i,
       })),
-      paymentOptions: paymentOptions.filter((p) => p.enabled && p.paymentUrl),
+      paymentOptions: paymentOptions
+        .filter((p) => p.enabled && p.paymentUrl.trim())
+        .map((p, i) => ({
+          provider: p.label.trim() ? slugify(p.label.trim()) : `link-${i}`,
+          label: p.label.trim(),
+          icon: (p.icon || "").trim(),
+          paymentUrl: p.paymentUrl.trim(),
+          enabled: 1,
+          sortOrder: i,
+        })),
       features: features
         .filter((f) => (f.text || "").trim())
         .map((f, i) => ({
@@ -333,6 +341,34 @@ export function ProductForm({ product, categories }: ProductFormProps) {
         </div>
       </section>
 
+      {/* Purchase Buttons */}
+      <section style={sectionStyle}>
+        <h2 className="text-lg font-semibold mb-1" style={{ color: "var(--text-primary)" }}>Purchase Buttons</h2>
+        <p className="text-sm mb-4" style={{ color: "var(--text-muted)" }}>
+          The main button opens a dropdown of the enabled payment providers. The secondary button (e.g. "Contact Us") is a plain link shown below it.
+        </p>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <Input
+            label="Main button text"
+            value={form.ctaText}
+            onChange={(e) => updateField("ctaText", e.target.value)}
+            placeholder={form.productType === "FREE" ? "Get Instant Access Now" : form.productType === "PREBOOK" ? "Pre-book Now — Pay Advance" : form.productType === "CUSTOM_QUOTE" ? "Request a Quote" : "Buy Now"}
+          />
+          <Input
+            label="Secondary button text"
+            value={form.secondaryCtaText}
+            onChange={(e) => updateField("secondaryCtaText", e.target.value)}
+            placeholder="Contact Us"
+          />
+          <Input
+            label="Secondary button URL (empty = /contact)"
+            value={form.secondaryCtaUrl}
+            onChange={(e) => updateField("secondaryCtaUrl", e.target.value)}
+            placeholder="https://wa.me/91XXXXXXXXXX"
+          />
+        </div>
+      </section>
+
       {/* Pricing */}
       <section style={sectionStyle}>
         <h2 className="text-lg font-semibold mb-1" style={{ color: "var(--text-primary)" }}>Pricing</h2>
@@ -370,7 +406,6 @@ export function ProductForm({ product, categories }: ProductFormProps) {
           {renderCheckbox("showLimitedOffer", "Show Limited Time Offer", "Shows the conversion-focused offer section on the product page.")}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <Input label="Offer Label" value={form.offerLabel} onChange={(e) => updateField("offerLabel", e.target.value)} placeholder="Limited Time Offer" />
-            <Input label="CTA Text" value={form.ctaText} onChange={(e) => updateField("ctaText", e.target.value)} placeholder="Get Instant Access Now" />
           </div>
           <div>
             {renderTextarea("Payment Description", form.paymentDescription, (v) => updateField("paymentDescription", v), 2)}
@@ -463,7 +498,7 @@ export function ProductForm({ product, categories }: ProductFormProps) {
       {/* Payment Options */}
       <section style={sectionStyle}>
         <h2 className="text-lg font-semibold mb-4" style={{ color: "var(--text-primary)" }}>Payment Options</h2>
-        <PaymentOptionsEditor options={paymentOptions} onChange={setPaymentOptions} />
+        <PaymentOptionsEditor options={paymentOptions} onChange={setPaymentOptions} slug={form.slug} />
       </section>
 
       {/* What's Included */}
