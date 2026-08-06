@@ -1,6 +1,14 @@
 import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
-import { products, productImages, paymentOptions } from "@/db/schema";
+import {
+  products,
+  productImages,
+  paymentOptions,
+  productFeatures,
+  faqs,
+  productReviews,
+  productPerfectFor,
+} from "@/db/schema";
 import { eq, desc } from "drizzle-orm";
 import { auth } from "@/lib/auth";
 
@@ -39,7 +47,15 @@ export async function POST(req: Request) {
   if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   const body = await req.json();
-  const { images: imgs, paymentOptions: payments, ...productData } = body;
+  const {
+    images: imgs,
+    paymentOptions: payments,
+    features: feats,
+    faqs: faqItems,
+    reviews: reviewItems,
+    perfectFor: perfectForItems,
+    ...productData
+  } = body;
 
   const result = await db.insert(products).values(productData).returning().get();
 
@@ -61,6 +77,55 @@ export async function POST(req: Request) {
         provider: p.provider,
         paymentUrl: p.paymentUrl,
         enabled: 1,
+      }))
+    );
+  }
+
+  if (feats?.length) {
+    await db.insert(productFeatures).values(
+      feats.map((f: any) => ({
+        productId: result.id,
+        feature: f.feature,
+        enabled: f.enabled,
+        sortOrder: f.sortOrder,
+      }))
+    );
+  }
+
+  if (faqItems?.length) {
+    await db.insert(faqs).values(
+      faqItems.map((f: any) => ({
+        productId: result.id,
+        question: f.question,
+        answer: f.answer,
+        enabled: f.enabled,
+        sortOrder: f.sortOrder,
+      }))
+    );
+  }
+
+  if (reviewItems?.length) {
+    await db.insert(productReviews).values(
+      reviewItems.map((r: any) => ({
+        productId: result.id,
+        customerName: r.customerName,
+        company: r.company,
+        rating: r.rating,
+        reviewText: r.reviewText,
+        enabled: r.enabled,
+        sortOrder: r.sortOrder,
+      }))
+    );
+  }
+
+  if (perfectForItems?.length) {
+    await db.insert(productPerfectFor).values(
+      perfectForItems.map((p: any) => ({
+        productId: result.id,
+        title: p.title,
+        description: p.description,
+        enabled: p.enabled,
+        sortOrder: p.sortOrder,
       }))
     );
   }

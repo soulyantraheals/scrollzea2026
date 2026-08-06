@@ -180,9 +180,16 @@ export default async function HomePage() {
                       {product.shortDescription}
                     </p>
                     <div className="flex items-center justify-between mt-4 pt-4 border-t border-[var(--border-gold)]/30">
-                      <span className="font-bold text-[var(--accent-gold)]">
-                        {product.price === 0 ? "Free" : `₹${product.price.toLocaleString("en-IN")}`}
-                      </span>
+                      <div className="flex items-baseline gap-2">
+                        <span className="font-bold text-[var(--accent-gold)]">
+                          {product.price === 0 ? "Free" : `₹${product.price.toLocaleString("en-IN")}`}
+                        </span>
+                        {product.discountPrice && product.discountPrice > product.price && (
+                          <span className="text-xs line-through text-[var(--text-dim)]">
+                            ₹{product.discountPrice.toLocaleString("en-IN")}
+                          </span>
+                        )}
+                      </div>
                       <span className="text-xs text-[var(--text-dim)] group-hover:text-[var(--accent-gold)] transition-colors">View Details →</span>
                     </div>
                   </div>

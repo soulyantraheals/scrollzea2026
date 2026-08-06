@@ -62,6 +62,29 @@ export const products = sqliteTable("products", {
   seoTitle: text("seo_title"),
   seoDescription: text("seo_description"),
   whatsappMessage: text("whatsapp_message"),
+
+  // Pricing & Offer
+  originalPrice: real("original_price"),
+  salePrice: real("sale_price"),
+  currency: text("currency").notNull().default("INR"),
+  showLimitedOffer: integer("show_limited_offer").notNull().default(0),
+  offerLabel: text("offer_label").notNull().default("Limited Time Offer"),
+  paymentDescription: text("payment_description").notNull().default("One-time payment · Lifetime access · No subscriptions"),
+  ctaText: text("cta_text").notNull().default("Get Instant Access Now"),
+  socialProofText: text("social_proof_text").notNull().default("Join 50,000+ satisfied customers"),
+
+  // Urgency / Countdown
+  urgencyEnabled: integer("urgency_enabled").notNull().default(0),
+  showFireSymbol: integer("show_fire_symbol").notNull().default(1),
+  urgencyText: text("urgency_text").notNull().default("Hurry! Offer Ends In"),
+  expiresAt: text("expires_at"),
+
+  // YouTube Video
+  youtubeEnabled: integer("youtube_enabled").notNull().default(0),
+  youtubeUrl: text("youtube_url"),
+  youtubeButtonText: text("youtube_button_text").notNull().default("Watch YouTube Video"),
+  youtubeVideoTitle: text("youtube_video_title"),
+
   createdAt: text("created_at").notNull().default("datetime('now')"),
   updatedAt: text("updated_at").notNull().default("datetime('now')"),
 });
@@ -82,6 +105,8 @@ export const productFeatures = sqliteTable("product_features", {
   productId: integer("product_id").notNull(),
   feature: text("feature").notNull(),
   sortOrder: integer("sort_order").notNull().default(0),
+  enabled: integer("enabled").notNull().default(1),
+  createdAt: text("created_at").notNull().default("datetime('now')"),
 });
 
 // Payment Options
@@ -200,6 +225,31 @@ export const faqs = sqliteTable("faqs", {
   productId: integer("product_id"),
   question: text("question").notNull(),
   answer: text("answer").notNull(),
+  sortOrder: integer("sort_order").notNull().default(0),
+  enabled: integer("enabled").notNull().default(1),
+  createdAt: text("created_at").notNull().default("datetime('now')"),
+});
+
+// Product Reviews
+export const productReviews = sqliteTable("product_reviews", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
+  productId: integer("product_id").notNull(),
+  customerName: text("customer_name").notNull(),
+  company: text("company"),
+  rating: integer("rating").notNull().default(5),
+  reviewText: text("review_text").notNull(),
+  enabled: integer("enabled").notNull().default(1),
+  sortOrder: integer("sort_order").notNull().default(0),
+  createdAt: text("created_at").notNull().default("datetime('now')"),
+});
+
+// Perfect For
+export const productPerfectFor = sqliteTable("product_perfect_for", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
+  productId: integer("product_id").notNull(),
+  title: text("title").notNull(),
+  description: text("description"),
+  enabled: integer("enabled").notNull().default(1),
   sortOrder: integer("sort_order").notNull().default(0),
   createdAt: text("created_at").notNull().default("datetime('now')"),
 });

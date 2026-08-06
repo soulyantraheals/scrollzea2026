@@ -21,12 +21,13 @@ interface ProductCardProps {
 
 export function ProductCard({ product }: ProductCardProps) {
   const primaryImage = product.images?.find((i) => i.isPrimary) || product.images?.[0];
+  // price = selling price (shown big), discountPrice = original/MRP (struck through)
   const hasDiscount =
-    product.discountPrice && product.discountPrice < product.price;
+    product.discountPrice && product.discountPrice > product.price;
   const isFree = product.price === 0 && product.productType === "FREE";
   const discountPercent = hasDiscount
     ? Math.round(
-        ((product.price - product.discountPrice!) / product.price) * 100
+        ((product.discountPrice! - product.price) / product.discountPrice!) * 100
       )
     : 0;
 
@@ -111,13 +112,11 @@ export function ProductCard({ product }: ProductCardProps) {
             ) : (
               <>
                 <span className="text-lg font-bold" style={{ color: "var(--accent-gold)" }}>
-                  {hasDiscount
-                    ? formatPrice(product.discountPrice!)
-                    : formatPrice(product.price)}
+                  {formatPrice(product.price)}
                 </span>
                 {hasDiscount && (
                   <span className="text-sm line-through" style={{ color: "var(--text-dim)" }}>
-                    {formatPrice(product.price)}
+                    {formatPrice(product.discountPrice!)}
                   </span>
                 )}
               </>
