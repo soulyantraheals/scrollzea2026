@@ -72,8 +72,8 @@ export function OfferSection({ product }: OfferSectionProps) {
       : null;
 
   return (
-    <section className="relative overflow-hidden py-16 lg:py-20" style={{ backgroundColor: "var(--bg-secondary)" }}>
-      <div className="absolute inset-0 pointer-events-none">
+    <section className="relative py-16 lg:py-20" style={{ backgroundColor: "var(--bg-secondary)" }}>
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div
           className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] rounded-full blur-[120px]"
           style={{ backgroundColor: "var(--accent-gold)", opacity: 0.06 }}
