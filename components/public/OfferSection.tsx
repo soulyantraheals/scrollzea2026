@@ -7,8 +7,11 @@ import { PurchaseCta } from "./PurchaseCta";
 interface PaymentOption {
   id: number;
   provider: string;
+  label: string | null;
+  icon: string | null;
   paymentUrl: string | null;
   enabled: number;
+  sortOrder?: number;
 }
 
 interface OfferSectionProps {
@@ -23,6 +26,9 @@ interface OfferSectionProps {
     downloadUrl: string | null;
     leadCaptureRequired: number;
     ctaText: string;
+    slug: string;
+    secondaryCtaText: string;
+    secondaryCtaUrl: string;
     whatsappMessage?: string | null;
     showLimitedOffer: number;
     offerLabel: string;

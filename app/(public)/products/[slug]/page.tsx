@@ -106,6 +106,7 @@ export default async function ProductDetailPage({ params }: Props) {
 
   const purchaseProduct = {
     id: product.id,
+    slug: product.slug,
     name: product.name,
     productType: product.productType,
     price: product.price,
@@ -114,6 +115,8 @@ export default async function ProductDetailPage({ params }: Props) {
     downloadUrl: product.downloadUrl,
     leadCaptureRequired: product.leadCaptureRequired,
     ctaText: product.ctaText,
+    secondaryCtaText: product.secondaryCtaText,
+    secondaryCtaUrl: product.secondaryCtaUrl || "",
     whatsappMessage: product.whatsappMessage,
     paymentOptions: product.paymentOptions || [],
   };
