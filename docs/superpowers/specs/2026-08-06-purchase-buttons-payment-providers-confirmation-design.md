@@ -76,7 +76,7 @@ Reuse the existing `ListEditor` interaction pattern (add / remove / reorder rows
 
 Plus a **"Copy success page URL"** helper near the section: copies `/products/{slug}/success` so the owner can paste it into Gumroad / Razorpay-dashboard redirect settings.
 
-Form payload: send full `paymentOptions` array (including disabled/unfilled rows so the editor round-trips; filter to enabled+URL rows at save time as today).
+Form payload: at save time, filter to rows that are **enabled AND have a non-empty URL** (same rule as today). Unfilled/disabled rows are dropped. The dynamic editor keeps working rows in client state while the form is open; they persist only if saved with a URL.
 
 ## 3. Public purchase UI (`components/public/PurchaseCta.tsx`)
 
@@ -105,7 +105,7 @@ Applied to **all four product types**.
 - Product name, price (selling price; struck MRP if discount), provider (from `?provider=` query), optional reference (`?ref=`)
 - **Download link** when `deliveryMethod === "download"` and `downloadUrl` exists
 - "What happens next" — `paymentDescription` text
-- WhatsApp support CTA (uses `whatsappMessage` / `whatsappMessage` link)
+- WhatsApp support CTA (uses the product's `whatsappMessage` to build a `wa.me` link, or falls back to `/contact`)
 - Links: "Return to product" (`/products/{slug}`), "Browse more products" (`/products`)
 
 ### Return path
