@@ -17,6 +17,8 @@ export async function GET(
   req: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  const session = await auth();
+  if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   const { id: idStr } = await params;
   const id = parseInt(idStr);
   const product = await db

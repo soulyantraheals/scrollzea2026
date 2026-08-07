@@ -4,6 +4,8 @@ import { websiteSettings } from "@/db/schema";
 import { auth } from "@/lib/auth";
 
 export async function GET() {
+  const session = await auth();
+  if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   const all = await db.select().from(websiteSettings).all();
   const settingsMap: Record<string, string> = {};
   all.forEach((s) => { settingsMap[s.key] = s.value || ""; });
