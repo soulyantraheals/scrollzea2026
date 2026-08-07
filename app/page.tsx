@@ -63,20 +63,20 @@ export default async function HomePage() {
 
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 lg:py-32 w-full relative z-10">
           <div className="max-w-3xl">
-            {/* Welcome text */}
-            <p className="text-sm sm:text-base font-medium text-[var(--accent-gold)] mb-3 tracking-wide">
-              Welcome to Scrollzea
-            </p>
+            {/* Title */}
+            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold leading-[1.05] tracking-tight">
+              Welcome to <span className="gold-gradient">Scrollzea</span>
+            </h1>
 
-            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-[var(--border-gold)] text-[var(--accent-gold)] text-xs font-medium tracking-wider uppercase mb-6">
+            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-[var(--border-gold)] text-[var(--accent-gold)] text-xs font-medium tracking-wider uppercase mb-6 mt-4">
               <span className="w-1.5 h-1.5 rounded-full bg-[var(--accent-gold)]" />
               Digital Products Marketplace
             </div>
 
-            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold leading-[1.05] tracking-tight">
+            <p className="mt-6 text-base sm:text-lg lg:text-xl text-[var(--text-muted)] leading-relaxed max-w-2xl">
               Ready-to-Use Digital Products for{" "}
-              <span className="gold-gradient">Business, Creators & Developers</span>
-            </h1>
+              <span className="gold-gradient">Business, Creators &amp; Developers</span>
+            </p>
 
             <p className="mt-6 text-base sm:text-lg lg:text-xl text-[var(--text-muted)] leading-relaxed max-w-2xl">
               Buy professional website templates, management systems, Flutter apps, automation tools, and custom digital solutions that save weeks of work.
