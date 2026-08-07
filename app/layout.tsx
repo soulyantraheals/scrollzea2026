@@ -19,6 +19,13 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
+      <head>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `(function(){try{var t=localStorage.getItem('scrollzea-theme');document.documentElement.classList.toggle('light-theme',t!=='dark');}catch(e){document.documentElement.classList.add('light-theme')}})();`,
+          }}
+        />
+      </head>
       <body>{children}</body>
     </html>
   );
